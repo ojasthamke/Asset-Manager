@@ -2,12 +2,17 @@ import React, { createContext, useContext, useState, useEffect, useMemo, ReactNo
 import {
   GroceryItem,
   Vendor,
+  OrderHistoryEntry,
+  Category,
+  UnitType,
   loadItems,
   saveItems,
   loadVendors,
   saveVendors,
   loadRestaurantName,
   saveRestaurantName,
+  loadHistory,
+  saveHistory,
 } from "@/lib/store";
 import * as Crypto from "expo-crypto";
 
@@ -15,18 +20,23 @@ interface OrderContextValue {
   items: GroceryItem[];
   vendors: Vendor[];
   restaurantName: string;
+  history: OrderHistoryEntry[];
   isLoading: boolean;
   toggleItem: (id: string) => void;
   setItemQuantity: (id: string, quantity: number) => void;
+  setItemUnit: (id: string, unit: UnitType) => void;
   selectAllItems: () => void;
   deselectAllItems: () => void;
-  addItem: (name: string, unit: string) => void;
+  addItem: (name: string, unit: UnitType, category: Category) => void;
   removeItem: (id: string) => void;
   addVendor: (name: string, phone: string) => void;
   removeVendor: (id: string) => void;
   updateVendor: (id: string, name: string, phone: string) => void;
   updateRestaurantName: (name: string) => void;
   resetSelections: () => void;
+  addHistoryEntry: (entry: Omit<OrderHistoryEntry, "id">) => void;
+  deleteHistoryEntry: (id: string) => void;
+  clearHistory: () => void;
 }
 
 const OrderContext = createContext<OrderContextValue | null>(null);
@@ -35,18 +45,21 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [restaurantName, setRestaurantName] = useState("My Restaurant");
+  const [history, setHistory] = useState<OrderHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [loadedItems, loadedVendors, loadedName] = await Promise.all([
+      const [loadedItems, loadedVendors, loadedName, loadedHistory] = await Promise.all([
         loadItems(),
         loadVendors(),
         loadRestaurantName(),
+        loadHistory(),
       ]);
       setItems(loadedItems);
       setVendors(loadedVendors);
       setRestaurantName(loadedName);
+      setHistory(loadedHistory);
       setIsLoading(false);
     })();
   }, []);
@@ -72,6 +85,16 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const setItemUnit = (id: string, unit: UnitType) => {
+    setItems((prev) => {
+      const updated = prev.map((item) =>
+        item.id === id ? { ...item, unit } : item,
+      );
+      saveItems(updated);
+      return updated;
+    });
+  };
+
   const selectAllItems = () => {
     setItems((prev) => {
       const updated = prev.map((item) => ({ ...item, selected: true }));
@@ -88,11 +111,12 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const addItem = (name: string, unit: string) => {
+  const addItem = (name: string, unit: UnitType, category: Category) => {
     const newItem: GroceryItem = {
       id: Crypto.randomUUID(),
       name,
       unit,
+      category,
       selected: false,
       quantity: 1,
     };
@@ -159,14 +183,41 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const addHistoryEntry = (entry: Omit<OrderHistoryEntry, "id">) => {
+    const newEntry: OrderHistoryEntry = {
+      ...entry,
+      id: Crypto.randomUUID(),
+    };
+    setHistory((prev) => {
+      const updated = [newEntry, ...prev];
+      saveHistory(updated);
+      return updated;
+    });
+  };
+
+  const deleteHistoryEntry = (id: string) => {
+    setHistory((prev) => {
+      const updated = prev.filter((e) => e.id !== id);
+      saveHistory(updated);
+      return updated;
+    });
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    saveHistory([]);
+  };
+
   const value = useMemo(
     () => ({
       items,
       vendors,
       restaurantName,
+      history,
       isLoading,
       toggleItem,
       setItemQuantity,
+      setItemUnit,
       selectAllItems,
       deselectAllItems,
       addItem,
@@ -176,8 +227,11 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       updateVendor,
       updateRestaurantName,
       resetSelections,
+      addHistoryEntry,
+      deleteHistoryEntry,
+      clearHistory,
     }),
-    [items, vendors, restaurantName, isLoading],
+    [items, vendors, restaurantName, history, isLoading],
   );
 
   return (
