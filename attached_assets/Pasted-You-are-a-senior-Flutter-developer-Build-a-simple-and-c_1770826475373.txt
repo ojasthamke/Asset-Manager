@@ -1,0 +1,82 @@
+You are a senior Flutter developer.
+
+Build a simple and clean Flutter Android app for restaurant owners to place daily orders to vendors using WhatsApp.
+
+Target users:
+- Restaurant / cloud kitchen owners
+- Non-technical users
+
+Core problem:
+Restaurant owners currently have to open WhatsApp, search vendor names, and manually type item orders.
+This app should reduce time and effort.
+
+App requirements:
+
+1. Home Screen – Item Selection
+- Show a scrollable list of grocery / kitchen items
+- Each item should have:
+  - Checkbox
+  - Quantity input field (optional, default 1)
+- Example items:
+  Onion, Tomato, Potato, Paneer, Cheese, Cooking Oil, Chicken
+
+2. Vendor Selection Screen
+- Show a list of vendors with:
+  - Checkbox (single selection only)
+  - Vendor name
+  - WhatsApp number stored in code
+- Example vendors:
+  - Ramesh Veg Supplier – 91XXXXXXXXXX
+  - Suresh Dairy – 91XXXXXXXXXX
+  - Chicken Center – 91XXXXXXXXXX
+
+3. Order Message Generation
+- When user clicks "Send Order":
+  - Generate a professional WhatsApp message automatically
+  - Format example:
+
+    Hello {{Vendor Name}} 👋
+    Please send the following items:
+
+    • Onion – 5 kg
+    • Tomato – 3 kg
+    • Paneer – 2 kg
+
+    Thank you
+    - {{Restaurant Name}}
+
+4. WhatsApp Integration
+- Use WhatsApp URL intent (https://wa.me/)
+- Do NOT auto-send message
+- Open WhatsApp chat with message pre-filled
+
+5. UI / UX
+- Clean, minimal UI
+- Large buttons (easy for shop owners)
+- Dark mode support
+- Material Design
+- No login required
+
+6. Technical constraints
+- Flutter (latest stable)
+- Single codebase
+- Beginner-friendly code
+- Proper comments explaining logic
+- No backend (local data only)
+- Use url_launcher package
+
+7. Deliverables
+- Complete working Flutter code
+- main.dart + necessary models
+- pubspec.yaml dependencies
+- Clear instructions on how to run and build APK
+
+Important:
+- Keep code simple
+- Avoid over-engineering
+- Focus on usability
+- Assume the developer is a beginner
+
+Return:
+- Step-by-step explanation
+- Full copy-paste ready code
