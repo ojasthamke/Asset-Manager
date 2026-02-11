@@ -14,6 +14,7 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useOrder } from "@/lib/OrderContext";
 import { useTheme } from "@/lib/useTheme";
+import { getUnitLabel } from "@/lib/store";
 
 export default function VendorScreen() {
   const theme = useTheme();
@@ -45,39 +46,46 @@ export default function VendorScreen() {
           styles.header,
           {
             paddingTop: (insets.top || webTopInset) + 8,
-            backgroundColor: theme.surface,
-            borderBottomColor: theme.border,
+            backgroundColor: theme.background,
           },
         ]}
       >
         <View style={styles.headerRow}>
           <Pressable
             onPress={() => router.back()}
-            style={({ pressed }) => [
-              styles.backBtn,
-              { opacity: pressed ? 0.6 : 1 },
-            ]}
+            style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1, backgroundColor: theme.surface }]}
           >
-            <Ionicons name="arrow-back" size={24} color={theme.text} />
+            <Ionicons name="arrow-back" size={22} color={theme.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text
-              style={[
-                styles.headerTitle,
-                { color: theme.text, fontFamily: "Poppins_700Bold" },
-              ]}
-            >
+            <Text style={[styles.headerTitle, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>
               Choose Vendor
             </Text>
-            <Text
-              style={[
-                styles.headerSubtitle,
-                { color: theme.textSecondary, fontFamily: "Poppins_400Regular" },
-              ]}
-            >
-              {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""} in
-              your order
+            <Text style={[styles.headerSubtitle, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
+              {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""} in your order
             </Text>
+          </View>
+        </View>
+
+        <View style={[styles.itemSummary, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
+            Order Summary
+          </Text>
+          <View style={styles.summaryChips}>
+            {selectedItems.slice(0, 4).map((item) => (
+              <View key={item.id} style={[styles.summaryChip, { backgroundColor: theme.tint + "12" }]}>
+                <Text style={[styles.summaryChipText, { color: theme.tint, fontFamily: "Poppins_500Medium" }]}>
+                  {item.name} ({item.quantity} {getUnitLabel(item.unit)})
+                </Text>
+              </View>
+            ))}
+            {selectedItems.length > 4 && (
+              <View style={[styles.summaryChip, { backgroundColor: theme.inputBg }]}>
+                <Text style={[styles.summaryChipText, { color: theme.textSecondary, fontFamily: "Poppins_500Medium" }]}>
+                  +{selectedItems.length - 4} more
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </View>
@@ -85,10 +93,7 @@ export default function VendorScreen() {
       <FlatList
         data={vendors}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[
-          styles.listContent,
-          { paddingBottom: 120 },
-        ]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 140 }]}
         showsVerticalScrollIndicator={false}
         renderItem={({ item: vendor }) => {
           const isSelected = selectedVendorId === vendor.id;
@@ -97,7 +102,7 @@ export default function VendorScreen() {
               style={[
                 styles.vendorCard,
                 {
-                  backgroundColor: isSelected ? theme.tint + "12" : theme.surface,
+                  backgroundColor: isSelected ? theme.tint + "0D" : theme.surface,
                   borderColor: isSelected ? theme.tint : theme.border,
                   borderWidth: isSelected ? 2 : 1,
                 },
@@ -108,34 +113,16 @@ export default function VendorScreen() {
               }}
             >
               <View style={styles.vendorLeft}>
-                <View
-                  style={[
-                    styles.vendorAvatar,
-                    { backgroundColor: theme.tint + "20" },
-                  ]}
-                >
-                  <Ionicons name="storefront-outline" size={24} color={theme.tint} />
+                <View style={[styles.vendorAvatar, { backgroundColor: isSelected ? theme.tint + "20" : theme.inputBg }]}>
+                  <Ionicons name="storefront-outline" size={22} color={isSelected ? theme.tint : theme.textSecondary} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text
-                    style={[
-                      styles.vendorName,
-                      { color: theme.text, fontFamily: "Poppins_600SemiBold" },
-                    ]}
-                  >
+                  <Text style={[styles.vendorName, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]}>
                     {vendor.name}
                   </Text>
                   <View style={styles.phoneRow}>
-                    <Feather name="phone" size={12} color={theme.textSecondary} />
-                    <Text
-                      style={[
-                        styles.vendorPhone,
-                        {
-                          color: theme.textSecondary,
-                          fontFamily: "Poppins_400Regular",
-                        },
-                      ]}
-                    >
+                    <Feather name="phone" size={11} color={theme.textSecondary} />
+                    <Text style={[styles.vendorPhone, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
                       +{vendor.phone}
                     </Text>
                   </View>
@@ -150,9 +137,7 @@ export default function VendorScreen() {
                   },
                 ]}
               >
-                {isSelected && (
-                  <View style={styles.radioInner} />
-                )}
+                {isSelected && <View style={styles.radioInner} />}
               </View>
             </Pressable>
           );
@@ -160,12 +145,7 @@ export default function VendorScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Ionicons name="people-outline" size={48} color={theme.textSecondary} />
-            <Text
-              style={[
-                styles.emptyText,
-                { color: theme.textSecondary, fontFamily: "Poppins_400Regular" },
-              ]}
-            >
+            <Text style={[styles.emptyText, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
               No vendors yet. Add vendors in Settings.
             </Text>
           </View>
@@ -195,13 +175,8 @@ export default function VendorScreen() {
           ]}
         >
           <Ionicons name="logo-whatsapp" size={22} color="#fff" />
-          <Text
-            style={[
-              styles.sendButtonText,
-              { fontFamily: "Poppins_600SemiBold" },
-            ]}
-          >
-            Preview & Send via WhatsApp
+          <Text style={[styles.sendButtonText, { fontFamily: "Poppins_600SemiBold" }]}>
+            Preview & Send
           </Text>
         </Pressable>
       </View>
@@ -211,16 +186,17 @@ export default function VendorScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-  },
-  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  backBtn: { padding: 4 },
+  header: { paddingHorizontal: 20, paddingBottom: 12 },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 14 },
+  backBtn: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   headerTitle: { fontSize: 24, lineHeight: 30 },
   headerSubtitle: { fontSize: 13, marginTop: 2 },
-  listContent: { padding: 16, gap: 12 },
+  itemSummary: { borderRadius: 14, padding: 14, borderWidth: 1 },
+  summaryLabel: { fontSize: 11, marginBottom: 8, textTransform: "uppercase" as const, letterSpacing: 0.5 },
+  summaryChips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  summaryChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+  summaryChipText: { fontSize: 11 },
+  listContent: { padding: 16, gap: 10 },
   vendorCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -229,36 +205,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   vendorLeft: { flexDirection: "row", alignItems: "center", gap: 14, flex: 1 },
-  vendorAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  vendorAvatar: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   vendorName: { fontSize: 16 },
   phoneRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 3 },
   vendorPhone: { fontSize: 12 },
-  radio: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#fff",
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 80,
-    gap: 12,
-  },
+  radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: "center", justifyContent: "center" },
+  radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#fff" },
+  emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 12 },
   emptyText: { fontSize: 14, textAlign: "center" as const, maxWidth: 240 },
   bottomBar: {
     position: "absolute",
