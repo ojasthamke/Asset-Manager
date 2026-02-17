@@ -23,7 +23,8 @@
                     <h1 class="text-2xl font-bold text-gray-900 tracking-tight">QuickOrder Admin</h1>
                 </div>
                 <nav class="flex space-x-8">
-                    <button id="nav-vendors" onclick="showSection('vendors')" class="active-nav font-semibold pb-1 transition-all">Vendors</button>
+                    <button id="nav-users" onclick="showSection('users')" class="active-nav font-semibold pb-1 transition-all">Users</button>
+                    <button id="nav-vendors" onclick="showSection('vendors')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all">Vendors</button>
                     <button id="nav-items" onclick="showSection('items')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all">Items</button>
                 </nav>
             </div>
@@ -31,8 +32,33 @@
 
         <!-- Main Content -->
         <main class="flex-1 max-w-7xl mx-auto w-full p-6 lg:p-8">
+
+            <!-- Users Section -->
+            <section id="users-section" class="animate-in fade-in duration-300">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">App Users (Profiles)</h2>
+                    <p class="text-gray-500 mt-1">Details of shop owners and agencies using your app.</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Shop & Owner</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Role</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Turnover</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Language</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-list" class="bg-white divide-y divide-gray-100">
+                            <!-- Users loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- Vendors Section -->
-            <section id="vendors-section" class="animate-in fade-in duration-300">
+            <section id="vendors-section" class="hidden animate-in fade-in duration-300">
                 <div class="flex flex-col sm:row justify-between items-start sm:items-center mb-8 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900">Manage Vendors</h2>
@@ -166,23 +192,60 @@
     </div>
 
     <script>
-        let currentSection = 'vendors';
+        let currentSection = 'users';
         let vendors = [];
         let items = [];
+        let profiles = [];
 
         async function loadData() {
             try {
+                const profilesRes = await fetch('/api/profile');
+                const profile = await profilesRes.json();
+                profiles = profile ? [profile] : []; // Currently schema supports one primary profile for setup, but we'll adapt for multiple if needed later
+
+                // Fetching multiple profiles (if the API supports it)
+                const allProfilesRes = await fetch('/api/all-profiles').catch(() => null);
+                if (allProfilesRes && allProfilesRes.ok) {
+                    profiles = await allProfilesRes.json();
+                }
+
                 const vendorsRes = await fetch('/api/vendors');
                 vendors = await vendorsRes.json();
 
                 const itemsRes = await fetch('/api/items');
                 items = await itemsRes.json();
 
+                renderUsers();
                 renderVendors();
                 renderItems();
                 updateVendorDropdown();
             } catch (err) {
                 console.error("Error loading data:", err);
+            }
+        }
+
+        function renderUsers() {
+            const usersList = document.getElementById('users-list');
+            if (profiles.length === 0) {
+                usersList.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">No user profiles found yet. Users will appear here after they fill the onboarding form.</td></tr>';
+            } else {
+                usersList.innerHTML = profiles.map(p => `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-bold text-gray-900">${p.shopName}</div>
+                            <div class="text-xs text-gray-500">${p.ownerName}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">${p.phone}</div>
+                            <div class="text-xs text-gray-500 truncate max-w-xs">${p.address}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 ${p.role === 'agency' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'} rounded-full text-xs font-bold uppercase">${p.role.replace('_', ' ')}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">${p.turnover}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${p.language}</td>
+                    </tr>
+                `).join('');
             }
         }
 
@@ -251,9 +314,11 @@
 
         function showSection(section) {
             currentSection = section;
+            document.getElementById('users-section').classList.toggle('hidden', section !== 'users');
             document.getElementById('items-section').classList.toggle('hidden', section !== 'items');
             document.getElementById('vendors-section').classList.toggle('hidden', section !== 'vendors');
 
+            document.getElementById('nav-users').className = section === 'users' ? 'active-nav font-semibold pb-1 transition-all' : 'text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all';
             document.getElementById('nav-items').className = section === 'items' ? 'active-nav font-semibold pb-1 transition-all' : 'text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all';
             document.getElementById('nav-vendors').className = section === 'vendors' ? 'active-nav font-semibold pb-1 transition-all' : 'text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all';
         }
