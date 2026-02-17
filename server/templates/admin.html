@@ -61,7 +61,11 @@
 
             <!-- Vendors Section -->
             <section id="vendors-section" class="hidden space-y-6">
-                 <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Vendor</button>
+                <div class="flex space-x-4 border-b">
+                    <button id="tab-all-vendors" onclick="filterVendors('all')" class="border-b-2 border-emerald-500 px-4 py-2 font-bold text-emerald-600">All Vendors</button>
+                    <button id="tab-special-vendors" onclick="filterVendors('special')" class="px-4 py-2 text-gray-500 hover:text-emerald-600 font-bold">Special Vendors</button>
+                </div>
+                <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Vendor</button>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -262,7 +266,7 @@
                 <tr>
                     <td class="px-4 py-3 text-sm font-bold">${p.shopName}<div class="text-xs font-normal text-gray-500">${p.ownerName}</div></td>
                     <td class="px-4 py-3 text-sm">${p.phone}<div class="text-xs text-gray-500 truncate max-w-[150px]">${p.address}</div></td>
-                    <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}<br>GST: ${p.gst || '-'}</td>
+                    <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}<br>GST: ${p.gst || '-'}<br>Turnover: ${p.turnover}</td>
                 </tr>
             `).join('');
 
@@ -390,12 +394,18 @@
             e.preventDefault();
             const type = document.getElementById('form-type').value;
             const editId = document.getElementById('edit-id').value;
-            const method = editId ? 'PATCH' : 'POST';
-            const endpoint = (type === 'item' ? '/api/items' : '/api/vendors') + (editId ? `/${editId}` : '');
 
+            const endpoint = editId ?
+                (type === 'item' ? `/api/items/${editId}` : `/api/vendors/${editId}`) :
+                (type === 'item' ? '/api/items' : '/api/vendors');
+
+            const method = editId ? 'PATCH' : 'POST';
+
+            let data = {};
             if (type === 'item') {
                 const checks = document.querySelectorAll('.vendor-check:checked');
                 const vendorIds = Array.from(checks).map(c => c.value);
+
                 const itemData = {
                     name: document.getElementById('item-name').value,
                     price: document.getElementById('item-price').value,
@@ -404,19 +414,34 @@
                 };
 
                 if (editId) {
-                    await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...itemData, vendorId: vendorIds[0]}) });
+                    data = { ...itemData, vendorId: vendorIds[0] || 'common' };
                 } else {
-                    await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...itemData, vendorIds}) });
+                    data = { ...itemData, vendorIds };
                 }
             } else {
-                const data = {
+                data = {
                     name: document.getElementById('vendor-name').value,
                     phone: document.getElementById('vendor-phone').value.replace(/\D/g, ''),
                     isSpecial: document.getElementById('vendor-special').checked
                 };
-                await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             }
-            closeModal(); loadData();
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    loadData();
+                } else {
+                    alert("Failed to save. Please try again.");
+                }
+            } catch (err) {
+                alert("Error connecting to server.");
+            }
         }
 
         function editVendor(id) { openModal('vendor', id); }
