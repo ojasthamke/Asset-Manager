@@ -30,18 +30,20 @@
 
     <!-- Main Admin Panel -->
     <div id="admin-panel" class="hidden">
-        <header class="bg-white border-b px-4 sm:px-6 py-4 shadow-sm">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <h1 class="text-xl sm:text-2xl font-bold text-gray-900">QuickOrder Admin</h1>
-                <nav class="flex space-x-4 sm:space-x-8 text-sm sm:text-base">
+        <header class="bg-white border-b px-4 sm:px-6 py-4 shadow-sm overflow-x-auto">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 whitespace-nowrap">QuickOrder Admin</h1>
+                <nav class="flex space-x-4 sm:space-x-8 text-xs sm:text-base whitespace-nowrap pb-2 sm:pb-0">
                     <button id="nav-users" onclick="showSection('users')" class="active-nav font-semibold pb-1">Users</button>
                     <button id="nav-vendors" onclick="showSection('vendors')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1">Vendors</button>
                     <button id="nav-items" onclick="showSection('items')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1">Items</button>
+                    <button id="nav-transactions" onclick="showSection('transactions')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1">Transactions</button>
                 </nav>
             </div>
         </header>
 
         <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+            <!-- Users Section -->
             <section id="users-section">
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                      <table class="min-w-full divide-y divide-gray-200">
@@ -57,6 +59,7 @@
                 </div>
             </section>
 
+            <!-- Vendors Section -->
             <section id="vendors-section" class="hidden space-y-6">
                  <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Vendor</button>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
@@ -69,7 +72,12 @@
                 </div>
             </section>
 
+            <!-- Items Section -->
             <section id="items-section" class="hidden space-y-6">
+                <div class="flex space-x-4 border-b">
+                    <button id="tab-all-items" onclick="filterItems('all')" class="border-b-2 border-emerald-500 px-4 py-2 font-bold text-emerald-600">All Items</button>
+                    <button id="tab-common-items" onclick="filterItems('common')" class="px-4 py-2 text-gray-500 hover:text-emerald-600 font-bold">Common Items</button>
+                </div>
                 <button onclick="openModal('item')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Item</button>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -80,19 +88,42 @@
                     </table>
                 </div>
             </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions-section" class="hidden space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="vendor-stats"></div>
+                <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Items</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-list" class="bg-white divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 
     <!-- Modal for adding/editing (Common) -->
-    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 my-8">
             <h3 id="modal-title" class="text-xl font-bold mb-4">Add New</h3>
             <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
                 <input type="hidden" id="form-type">
                 <input type="hidden" id="edit-id">
 
                 <div id="item-fields" class="space-y-4">
-                    <select id="item-vendor" class="w-full border rounded-lg p-2"></select>
+                    <label class="block text-sm font-bold text-gray-700">Select Vendors (Multiple)</label>
+                    <div id="vendor-checkboxes" class="max-h-40 overflow-y-auto border rounded-lg p-2 space-y-2">
+                        <label class="flex items-center space-x-2 text-sm">
+                            <input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-600">Common (All Vendors)</span>
+                        </label>
+                    </div>
                     <input type="text" id="item-name" placeholder="Item Name" class="w-full border rounded-lg p-2">
                     <input type="number" step="0.01" id="item-price" placeholder="Price (₹)" class="w-full border rounded-lg p-2">
                     <select id="item-category" class="w-full border rounded-lg p-2">
@@ -117,6 +148,10 @@
     </div>
 
     <script>
+        let vendors = [];
+        let items = [];
+        let currentItemFilter = 'all';
+
         function handleLogin(event) {
             event.preventDefault();
             if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'password123') {
@@ -134,7 +169,7 @@
         if (sessionStorage.getItem('isAdminAuthenticated') === 'true') { showAdminPanel(); }
 
         function showSection(section) {
-            ['users', 'vendors', 'items'].forEach(id => {
+            ['users', 'vendors', 'items', 'transactions'].forEach(id => {
                 document.getElementById(`${id}-section`).classList.toggle('hidden', id !== section);
                 const navButton = document.getElementById(`nav-${id}`);
                 navButton.classList.toggle('active-nav', id === section);
@@ -142,10 +177,27 @@
             });
         }
 
+        function filterItems(filter) {
+            currentItemFilter = filter;
+            document.getElementById('tab-all-items').classList.toggle('border-b-2', filter === 'all');
+            document.getElementById('tab-all-items').classList.toggle('border-emerald-500', filter === 'all');
+            document.getElementById('tab-all-items').classList.toggle('text-emerald-600', filter === 'all');
+            document.getElementById('tab-common-items').classList.toggle('border-b-2', filter === 'common');
+            document.getElementById('tab-common-items').classList.toggle('border-emerald-500', filter === 'common');
+            document.getElementById('tab-common-items').classList.toggle('text-emerald-600', filter === 'common');
+            renderItems();
+        }
+
         async function loadData() {
-            // Load Users
-            const pRes = await fetch('/api/all-profiles');
+            const [pRes, vRes, iRes, oRes] = await Promise.all([
+                fetch('/api/all-profiles'), fetch('/api/vendors'), fetch('/api/items'), fetch('/api/orders')
+            ]);
+
             const profiles = await pRes.json();
+            vendors = await vRes.json();
+            items = await iRes.json();
+            const orders = await oRes.json();
+
             document.getElementById('users-list').innerHTML = profiles.map(p => `
                 <tr>
                     <td class="px-4 py-3"><div class="font-bold">${p.shopName}</div><div class="text-xs text-gray-500">${p.ownerName}</div></td>
@@ -154,22 +206,64 @@
                 </tr>
             `).join('');
 
-            // Load Vendors
-            const vRes = await fetch('/api/vendors');
-            const vendors = await vRes.json();
             document.getElementById('vendors-list').innerHTML = vendors.map(v => `
                 <tr><td class="px-4 py-3 text-sm font-bold">${v.name}</td><td class="px-4 py-3 text-sm">${v.phone}</td>
-                <td class="px-4 py-3 text-right"><button onclick="deleteVendor('${v.id}')" class="text-red-500">Delete</button></td></tr>
+                <td class="px-4 py-3 text-right"><button onclick="deleteVendor('${v.id}')" class="text-red-500 font-bold">Delete</button></td></tr>
             `).join('');
-            document.getElementById('item-vendor').innerHTML = vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
 
-            // Load Items
-            const iRes = await fetch('/api/items');
-            const items = await iRes.json();
-            document.getElementById('items-list').innerHTML = items.map(item => {
+            const checkContainer = document.getElementById('vendor-checkboxes');
+            const commonCheck = checkContainer.firstElementChild.outerHTML;
+            checkContainer.innerHTML = commonCheck + vendors.map(v => `
+                <label class="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" value="${v.id}" class="vendor-check"> <span>${v.name}</span>
+                </label>
+            `).join('');
+
+            renderItems();
+            renderTransactions(orders);
+        }
+
+        function renderItems() {
+            const filtered = currentItemFilter === 'common' ? items.filter(i => i.vendorId === 'common') : items;
+            document.getElementById('items-list').innerHTML = filtered.map(item => {
                 const vendor = vendors.find(v => v.id === item.vendorId);
-                return `<tr><td class="px-4 py-3 text-sm font-bold">${item.name}</td><td class="px-4 py-3 text-xs text-gray-500">${vendor ? vendor.name : '?'}</td>
-                <td class="px-4 py-3 text-sm font-bold">₹${item.price}</td><td class="px-4 py-3 text-right"><button onclick="deleteItem('${item.id}')" class="text-red-500">Delete</button></td></tr>`;
+                return `<tr>
+                    <td class="px-4 py-3 text-sm font-bold">${item.name}</td>
+                    <td class="px-4 py-3 text-xs text-gray-500">${item.vendorId === 'common' ? 'ALL VENDORS' : (vendor ? vendor.name : '?')}</td>
+                    <td class="px-4 py-3 text-sm font-bold">₹${item.price}</td>
+                    <td class="px-4 py-3 text-right"><button onclick="deleteItem('${item.id}')" class="text-red-500 font-bold">Delete</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderTransactions(orders) {
+            const stats = vendors.map(v => {
+                const vOrders = orders.filter(o => o.vendorId === v.id);
+                const total = vOrders.reduce((sum, o) => sum + parseFloat(o.totalAmount), 0);
+                return { name: v.name, count: vOrders.length, total };
+            });
+
+            document.getElementById('vendor-stats').innerHTML = stats.map(s => `
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${s.name}</h4>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">₹${s.total.toFixed(2)}</div>
+                            <div class="text-xs text-gray-500 font-medium">${s.count} orders received</div>
+                        </div>
+                        <div class="bg-emerald-50 text-emerald-600 p-2 rounded-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('orders-list').innerHTML = orders.slice().reverse().map(o => {
+                const vendor = vendors.find(v => v.id === o.vendorId);
+                return `<tr>
+                    <td class="px-4 py-3 text-xs text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</td>
+                    <td class="px-4 py-3 text-sm font-bold">${vendor ? vendor.name : '?'}</td>
+                    <td class="px-4 py-3 text-sm">${o.itemsCount} items</td>
+                    <td class="px-4 py-3 text-sm font-bold">₹${o.totalAmount}</td>
+                </tr>`;
             }).join('');
         }
 
@@ -185,19 +279,30 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             const type = document.getElementById('form-type').value;
-            const data = type === 'item' ? {
-                vendorId: document.getElementById('item-vendor').value,
-                name: document.getElementById('item-name').value,
-                price: document.getElementById('item-price').value,
-                category: document.getElementById('item-category').value,
-                unit: document.getElementById('item-unit').value
-            } : {
-                name: document.getElementById('vendor-name').value,
-                phone: document.getElementById('vendor-phone').value.replace(/\D/g, '')
-            };
-            await fetch(type === 'item' ? '/api/items' : '/api/vendors', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
-            });
+            if (type === 'item') {
+                const checks = document.querySelectorAll('.vendor-check:checked');
+                const vendorIds = Array.from(checks).map(c => c.value);
+                if (vendorIds.length === 0) return alert('Select at least one vendor');
+
+                const data = {
+                    name: document.getElementById('item-name').value,
+                    price: document.getElementById('item-price').value,
+                    category: document.getElementById('item-category').value,
+                    unit: document.getElementById('item-unit').value,
+                    vendorIds: vendorIds
+                };
+                await fetch('/api/items', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+                });
+            } else {
+                const data = {
+                    name: document.getElementById('vendor-name').value,
+                    phone: document.getElementById('vendor-phone').value.replace(/\D/g, '')
+                };
+                await fetch('/api/vendors', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+                });
+            }
             closeModal(); loadData();
         }
 

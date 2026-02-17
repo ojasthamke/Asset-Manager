@@ -13,7 +13,7 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeIn, Layout } from "react-native-reanimated";
+import Animated, { FadeIn, Layout, SlideInUp, SlideOutUp } from "react-native-reanimated";
 import { useOrder } from "@/lib/OrderContext";
 import { useTheme } from "@/lib/useTheme";
 import { Vendor } from "@/lib/store";
@@ -59,11 +59,32 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { vendors, isLoading } = useOrder();
   const [refreshing, setRefreshing] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        // Try to reach the server with a short timeout
+        const response = await fetch("https://quick-order-server-y11j.onrender.com/api/vendors", {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(3000)
+        });
+        setIsOffline(!response.ok);
+      } catch (error) {
+        setIsOffline(true);
+      }
+    };
+
+    checkConnection();
+    // Re-check every 10 seconds
+    const interval = setInterval(checkConnection, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    // In a real app, you'd trigger a re-fetch here
-    setTimeout(() => setRefreshing(false), 1000);
+    // Simulating refresh
+    setTimeout(() => setRefreshing(false), 1500);
   }, []);
 
   if (isLoading) {
@@ -74,11 +95,18 @@ export default function HomeScreen() {
     );
   }
 
-  const webTopInset = Platform.OS === "web" ? 67 : 0;
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+      {isOffline && (
+        <Animated.View entering={SlideInUp} exiting={SlideOutUp} style={[styles.offlineBanner, { backgroundColor: theme.danger + '15', borderBottomColor: theme.danger + '30' }]}>
+          <Ionicons name="wifi-outline" size={16} color={theme.danger} />
+          <Text style={[styles.offlineText, { color: theme.danger, fontFamily: 'Poppins_700Bold' }]}>
+            Disconnected. Please connect to the internet.
+          </Text>
+        </Animated.View>
+      )}
+
+      <View style={[styles.header, { paddingTop: insets.top + (isOffline ? 50 : 10) }]}>
         <Text style={[styles.headerTitle, { color: theme.text, fontFamily: "Poppins_800ExtraBold" }]}>
           QuickOrder
         </Text>
@@ -103,10 +131,10 @@ export default function HomeScreen() {
               <Ionicons name="people-outline" size={48} color={theme.textSecondary} />
             </View>
             <Text style={[styles.emptyText, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>
-              No Vendors Found
+              {isOffline ? "Connection Error" : "No Vendors Found"}
             </Text>
             <Text style={[styles.emptySubtext, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-              Add vendors using the Admin Panel to see them here.
+              {isOffline ? "Check your internet to load vendors." : "Add vendors using the Admin Panel to see them here."}
             </Text>
           </View>
         }
@@ -118,6 +146,21 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  offlineBanner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 45,
+    paddingBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderBottomWidth: 1,
+    zIndex: 100,
+  },
+  offlineText: { fontSize: 12 },
   header: { paddingHorizontal: 24, paddingBottom: 20 },
   headerTitle: { fontSize: 32, letterSpacing: -0.5 },
   headerSubtitle: { fontSize: 14, opacity: 0.7, marginTop: 4 },

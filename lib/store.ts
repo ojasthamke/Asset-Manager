@@ -85,22 +85,21 @@ export function getItemImage(imageKey?: string): ImageSourcePropType | null {
   return ITEM_IMAGES[imageKey] || null;
 }
 
-const ITEMS_KEY = "@quickorder_items_v2";
-const VENDORS_KEY = "@quickorder_vendors";
+const VENDORS_KEY = "@quickorder_vendors_v3";
 const RESTAURANT_KEY = "@quickorder_restaurant";
 const HISTORY_KEY = "@quickorder_history";
 const PROFILE_KEY = "@quickorder_profile";
+const getVendorItemsKey = (vendorId: string) => `@quickorder_items_v3_${vendorId}`;
 
 // Helper to get the correct API URL
 function getBaseUrl() {
-  // Use the live production URL
   return "https://quick-order-server-y11j.onrender.com";
 }
 
 export async function loadProfile(): Promise<Profile | null> {
   try {
     const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/profile`).catch(() => null);
+    const response = await fetch(`${baseUrl}/api/profile`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
 
     if (response && response.ok) {
       const profile = await response.json();
@@ -113,43 +112,35 @@ export async function loadProfile(): Promise<Profile | null> {
     const data = await AsyncStorage.getItem(PROFILE_KEY);
     return data ? JSON.parse(data) : null;
   } catch {
-    return null;
+    const data = await AsyncStorage.getItem(PROFILE_KEY);
+    return data ? JSON.parse(data) : null;
   }
 }
 
-export async function loadItems(vendorId?: string): Promise<GroceryItem[]> {
+export async function loadItems(vendorId: string): Promise<GroceryItem[]> {
+  const cacheKey = getVendorItemsKey(vendorId);
   try {
     const baseUrl = getBaseUrl();
-    const url = vendorId ? `${baseUrl}/api/items?vendorId=${vendorId}` : `${baseUrl}/api/items`;
-    const response = await fetch(url).catch(() => null);
+    const response = await fetch(`${baseUrl}/api/items?vendorId=${vendorId}`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
 
     if (response && response.ok) {
       const items = await response.json();
-      if (!vendorId) {
-        await AsyncStorage.setItem(ITEMS_KEY, JSON.stringify(items));
-      }
+      await AsyncStorage.setItem(cacheKey, JSON.stringify(items));
       return items;
     }
 
-    const data = await AsyncStorage.getItem(ITEMS_KEY);
-    const allItems: GroceryItem[] = data ? JSON.parse(data) : [];
-    if (vendorId) {
-      return allItems.filter(i => i.vendorId === vendorId);
-    }
-    return allItems;
+    const data = await AsyncStorage.getItem(cacheKey);
+    return data ? JSON.parse(data) : [];
   } catch {
-    return [];
+    const data = await AsyncStorage.getItem(cacheKey);
+    return data ? JSON.parse(data) : [];
   }
-}
-
-export async function saveItems(items: GroceryItem[]): Promise<void> {
-  await AsyncStorage.setItem(ITEMS_KEY, JSON.stringify(items));
 }
 
 export async function loadVendors(): Promise<Vendor[]> {
   try {
     const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/vendors`).catch(() => null);
+    const response = await fetch(`${baseUrl}/api/vendors`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
 
     if (response && response.ok) {
       const vendors = await response.json();
@@ -160,12 +151,9 @@ export async function loadVendors(): Promise<Vendor[]> {
     const data = await AsyncStorage.getItem(VENDORS_KEY);
     return data ? JSON.parse(data) : [];
   } catch {
-    return [];
+    const data = await AsyncStorage.getItem(VENDORS_KEY);
+    return data ? JSON.parse(data) : [];
   }
-}
-
-export async function saveVendors(vendors: Vendor[]): Promise<void> {
-  await AsyncStorage.setItem(VENDORS_KEY, JSON.stringify(vendors));
 }
 
 export async function loadRestaurantName(): Promise<string> {

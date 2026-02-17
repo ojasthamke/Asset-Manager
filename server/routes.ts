@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./storage";
-import { insertGroceryItemSchema, insertVendorSchema, insertProfileSchema } from "@shared/schema";
+import { insertGroceryItemSchema, insertVendorSchema, insertProfileSchema, insertOrderSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Profiles
@@ -17,9 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/profile", async (req, res) => {
     const parsed = insertProfileSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error });
-    }
+    if (!parsed.success) return res.status(400).json({ error: parsed.error });
     const profile = await storage.createProfile(parsed.data);
     res.status(201).json(profile);
   });
@@ -32,10 +30,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/items", async (req, res) => {
-    const parsed = insertGroceryItemSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error });
+    const { vendorIds, ...itemData } = req.body;
+
+    // Support multi-vendor adding
+    if (Array.isArray(vendorIds)) {
+      const createdItems = [];
+      for (const vId of vendorIds) {
+        const item = await storage.createGroceryItem({ ...itemData, vendorId: vId });
+        createdItems.push(item);
+      }
+      return res.status(201).json(createdItems);
     }
+
+    const parsed = insertGroceryItemSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error });
     const item = await storage.createGroceryItem(parsed.data);
     res.status(201).json(item);
   });
@@ -58,21 +66,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/vendors", async (req, res) => {
     const parsed = insertVendorSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error });
-    }
+    if (!parsed.success) return res.status(400).json({ error: parsed.error });
     const vendor = await storage.createVendor(parsed.data);
     res.status(201).json(vendor);
-  });
-
-  app.patch("/api/vendors/:id", async (req, res) => {
-    const vendor = await storage.updateVendor(req.params.id, req.body);
-    res.json(vendor);
   });
 
   app.delete("/api/vendors/:id", async (req, res) => {
     await storage.deleteVendor(req.params.id);
     res.status(204).end();
+  });
+
+  // Orders / Transactions
+  app.get("/api/orders", async (_req, res) => {
+    const orders = await storage.getOrders();
+    res.json(orders);
+  });
+
+  app.post("/api/orders", async (req, res) => {
+    const parsed = insertOrderSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error });
+    const order = await storage.createOrder(parsed.data);
+    res.status(201).json(order);
   });
 
   const httpServer = createServer(app);

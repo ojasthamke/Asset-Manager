@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, numeric, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -35,7 +35,7 @@ export const groceryItems = pgTable("grocery_items", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
-  vendorId: varchar("vendor_id").references(() => vendors.id).notNull(),
+  vendorId: text("vendor_id").notNull(), // Can be vendor UUID or 'common'
   name: text("name").notNull(),
   unit: text("unit").notNull(),
   category: text("category").notNull(),
@@ -43,6 +43,17 @@ export const groceryItems = pgTable("grocery_items", {
   imageKey: text("image_key"),
   selected: boolean("selected").notNull().default(false),
   quantity: integer("quantity").notNull().default(1),
+});
+
+export const orders = pgTable("orders", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  vendorId: varchar("vendor_id").references(() => vendors.id).notNull(),
+  profileId: varchar("profile_id").references(() => profiles.id),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  itemsCount: integer("items_count").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -55,6 +66,7 @@ export const insertGroceryItemSchema = createInsertSchema(groceryItems).extend({
   price: z.string().or(z.number()),
 });
 export const insertVendorSchema = createInsertSchema(vendors);
+export const insertOrderSchema = createInsertSchema(orders);
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -67,3 +79,6 @@ export type InsertGroceryItem = z.infer<typeof insertGroceryItemSchema>;
 
 export type Vendor = typeof vendors.$inferSelect;
 export type InsertVendor = z.infer<typeof insertVendorSchema>;
+
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;

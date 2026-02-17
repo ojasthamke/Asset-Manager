@@ -5,20 +5,8 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
  * Gets the base URL for the Express API server
  */
 export function getApiUrl(): string {
-  // 1. Production URL from Render
-  const productionUrl = "https://quick-order-server-y11j.onrender.com";
-
-  // Use production URL if not in development mode
-  if (!__DEV__) {
-    return productionUrl;
-  }
-
-  // 2. Local development
-  let host = process.env.EXPO_PUBLIC_DOMAIN;
-  if (host) return `https://${host}`;
-
-  // Fallback to the production URL even in dev if you want to test the live server
-  return productionUrl;
+  // Always use the live Render URL so it works on phone hotspot without laptop server
+  return "https://quick-order-server-y11j.onrender.com";
 }
 
 async function throwIfResNotOk(res: Response) {
