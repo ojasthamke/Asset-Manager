@@ -1,6 +1,6 @@
 import { users, type User, type InsertUser, groceryItems, vendors, type GroceryItem, type InsertGroceryItem, type Vendor, type InsertVendor, profiles, type Profile, type InsertProfile } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import pg from "pg";
 import * as dotenv from "dotenv";
 
@@ -15,6 +15,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
 
   getProfile(): Promise<Profile | undefined>;
+  getAllProfiles(): Promise<Profile[]>;
   createProfile(profile: InsertProfile): Promise<Profile>;
 
   getGroceryItems(vendorId?: string): Promise<GroceryItem[]>;
@@ -33,7 +34,7 @@ export class MemStorage implements IStorage {
   private users: Map<string, User> = new Map();
   private groceryItems: Map<string, GroceryItem> = new Map();
   private vendors: Map<string, Vendor> = new Map();
-  private profile: Profile | undefined;
+  private profiles: Map<string, Profile> = new Map();
   private currentId: number = 1;
 
   async getUser(id: string): Promise<User | undefined> { return this.users.get(id); }
@@ -45,10 +46,17 @@ export class MemStorage implements IStorage {
     this.users.set(user.id, user);
     return user;
   }
-  async getProfile() { return this.profile; }
+  async getProfile() {
+    return Array.from(this.profiles.values())[0];
+  }
+  async getAllProfiles(): Promise<Profile[]> {
+    return Array.from(this.profiles.values());
+  }
   async createProfile(p: InsertProfile) {
-    this.profile = { ...p, id: "1" };
-    return this.profile;
+    const id = (this.currentId++).toString();
+    const profile = { ...p, id };
+    this.profiles.set(id, profile);
+    return profile;
   }
   async getGroceryItems(vendorId?: string) {
     const items = Array.from(this.groceryItems.values());
@@ -110,6 +118,10 @@ export class DatabaseStorage implements IStorage {
   async getProfile(): Promise<Profile | undefined> {
     const [profile] = await this.db.select().from(profiles).limit(1);
     return profile;
+  }
+
+  async getAllProfiles(): Promise<Profile[]> {
+    return await this.db.select().from(profiles);
   }
 
   async createProfile(insertProfile: InsertProfile): Promise<Profile> {

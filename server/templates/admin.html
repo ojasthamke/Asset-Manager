@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - QuickOrder</title>
+    <title>Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,424 +11,100 @@
         .active-nav { color: #10B981; border-bottom: 2px solid #10B981; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-white border-b px-6 py-4 shadow-sm">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-emerald-500 p-2 rounded-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h12l1 12H4L5 9z"></path></svg>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">QuickOrder Admin</h1>
-                </div>
-                <nav class="flex space-x-8">
-                    <button id="nav-users" onclick="showSection('users')" class="active-nav font-semibold pb-1 transition-all">Users</button>
-                    <button id="nav-vendors" onclick="showSection('vendors')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all">Vendors</button>
-                    <button id="nav-items" onclick="showSection('items')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all">Items</button>
-                </nav>
-            </div>
-        </header>
+<body class="bg-gray-100">
 
-        <!-- Main Content -->
-        <main class="flex-1 max-w-7xl mx-auto w-full p-6 lg:p-8">
-
-            <!-- Users Section -->
-            <section id="users-section" class="animate-in fade-in duration-300">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900">App Users (Profiles)</h2>
-                    <p class="text-gray-500 mt-1">Details of shop owners and agencies using your app.</p>
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-sm w-full bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Admin Login</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="space-y-4">
+                    <input type="text" id="username" placeholder="Username" class="w-full border-gray-200 rounded-lg p-3 text-sm" required>
+                    <input type="password" id="password" placeholder="Password" class="w-full border-gray-200 rounded-lg p-3 text-sm" required>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Shop & Owner</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Role</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Turnover</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Language</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-list" class="bg-white divide-y divide-gray-100">
-                            <!-- Users loaded via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Vendors Section -->
-            <section id="vendors-section" class="hidden animate-in fade-in duration-300">
-                <div class="flex flex-col sm:row justify-between items-start sm:items-center mb-8 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Manage Vendors</h2>
-                        <p class="text-gray-500 mt-1">Configure vendors and their WhatsApp contact details.</p>
-                    </div>
-                    <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-2.5 rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all font-semibold flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add New Vendor
-                    </button>
-                </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vendor Name</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">WhatsApp Phone</th>
-                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vendors-list" class="bg-white divide-y divide-gray-100">
-                            <!-- Vendors loaded via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Items Section -->
-            <section id="items-section" class="hidden animate-in fade-in duration-300">
-                <div class="flex flex-col sm:row justify-between items-start sm:items-center mb-8 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Manage Grocery Items</h2>
-                        <p class="text-gray-500 mt-1">Assign items and prices to specific vendors.</p>
-                    </div>
-                    <button onclick="openModal('item')" class="bg-emerald-500 text-white px-6 py-2.5 rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all font-semibold flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add New Item
-                    </button>
-                </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Item Name</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vendor</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Price (₹)</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Unit</th>
-                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="items-list" class="bg-white divide-y divide-gray-100">
-                            <!-- Items loaded via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Modal for adding/editing -->
-    <div id="modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 transition-all">
-        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-all scale-100">
-            <div class="flex justify-between items-center mb-6">
-                <h3 id="modal-title" class="text-2xl font-bold text-gray-900">Add Item</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 p-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-
-            <form id="modal-form" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" id="form-type">
-                <input type="hidden" id="edit-id">
-
-                <div id="item-fields" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Assign to Vendor</label>
-                        <select id="item-vendor" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none bg-no-repeat bg-right" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-position: calc(100% - 12px) center; background-size: 18px;">
-                            <option value="">Select a vendor...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Item Name</label>
-                        <input type="text" id="item-name" placeholder="e.g. Fresh Tomatoes" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Price (in Rupees ₹)</label>
-                        <input type="number" step="0.01" id="item-price" placeholder="0.00" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Category</label>
-                        <select id="item-category" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none bg-no-repeat bg-right" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-position: calc(100% - 12px) center; background-size: 18px;">
-                            <option>Vegetables</option>
-                            <option>Dairy</option>
-                            <option>Meat & Eggs</option>
-                            <option>Staples</option>
-                            <option>Spices & Herbs</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Default Unit</label>
-                        <select id="item-unit" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none bg-no-repeat bg-right" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-position: calc(100% - 12px) center; background-size: 18px;">
-                            <option value="g">Grams (g)</option>
-                            <option value="kg">Kilograms (kg)</option>
-                            <option value="litre">Litres (L)</option>
-                            <option value="pieces">Pieces (pcs)</option>
-                            <option value="bunch">Bunch</option>
-                            <option value="tray">Tray</option>
-                            <option value="packet">Packet</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="vendor-fields" class="hidden space-y-5">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Vendor Name</label>
-                        <input type="text" id="vendor-name" placeholder="e.g. Global Foods" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">WhatsApp Phone (with Country Code)</label>
-                        <input type="text" id="vendor-phone" placeholder="e.g. 919876543210" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
-                        <p class="text-xs text-gray-400 mt-2 italic">Do not include +, spaces or dashes.</p>
-                    </div>
-                </div>
-
-                <div class="flex space-x-4 mt-10">
-                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-all border border-transparent hover:border-gray-100">Cancel</button>
-                    <button id="save-button" type="submit" class="flex-1 bg-emerald-500 text-white px-4 py-3 rounded-xl font-bold hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all active:scale-95">Save</button>
-                </div>
+                <button type="submit" class="mt-6 w-full bg-emerald-500 text-white font-bold py-3 rounded-lg hover:bg-emerald-600 transition-all">Login</button>
+                <p id="login-error" class="text-red-500 text-sm mt-2 text-center"></p>
             </form>
         </div>
     </div>
 
+    <!-- Main Admin Panel -->
+    <div id="admin-panel" class="hidden">
+        <!-- Header -->
+        <header class="bg-white border-b px-4 sm:px-6 py-4 shadow-sm">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900">QuickOrder Admin</h1>
+                <nav class="flex space-x-2 sm:space-x-8 text-sm sm:text-base">
+                    <button id="nav-users" onclick="showSection('users')" class="active-nav font-semibold pb-1">Users</button>
+                    <button id="nav-vendors" onclick="showSection('vendors')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1">Vendors</button>
+                    <button id="nav-items" onclick="showSection('items')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1">Items</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+            <!-- Users Section -->
+            <section id="users-section">
+                <div class="bg-white rounded-xl shadow-sm overflow-auto">
+                     <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Shop</th>
+                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Contact</th>
+                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-list" class="bg-white divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Other sections hidden by default -->
+        </main>
+    </div>
+
     <script>
-        let currentSection = 'users';
-        let vendors = [];
-        let items = [];
-        let profiles = [];
+        // --- AUTHENTICATION ---
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
+            // In a real app, you'd fetch this from the server, but for simplicity we embed it.
+            // Replace 'admin' and 'password' with your desired credentials.
+            const ADMIN_USER = 'admin';
+            const ADMIN_PASS = 'password123';
+
+            if (username === ADMIN_USER && password === ADMIN_PASS) {
+                sessionStorage.setItem('isAdminAuthenticated', 'true');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadData();
+            } else {
+                document.getElementById('login-error').textContent = 'Invalid username or password.';
+            }
+        }
+
+        // Check auth on page load
+        if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('admin-panel').classList.remove('hidden');
+            loadData();
+        }
+
+        // --- DATA & UI LOGIC ---
         async function loadData() {
-            try {
-                const profilesRes = await fetch('/api/profile');
-                const profile = await profilesRes.json();
-                profiles = profile ? [profile] : []; // Currently schema supports one primary profile for setup, but we'll adapt for multiple if needed later
-
-                // Fetching multiple profiles (if the API supports it)
-                const allProfilesRes = await fetch('/api/all-profiles').catch(() => null);
-                if (allProfilesRes && allProfilesRes.ok) {
-                    profiles = await allProfilesRes.json();
-                }
-
-                const vendorsRes = await fetch('/api/vendors');
-                vendors = await vendorsRes.json();
-
-                const itemsRes = await fetch('/api/items');
-                items = await itemsRes.json();
-
-                renderUsers();
-                renderVendors();
-                renderItems();
-                updateVendorDropdown();
-            } catch (err) {
-                console.error("Error loading data:", err);
-            }
-        }
-
-        function renderUsers() {
+            const res = await fetch('/api/all-profiles');
+            const profiles = await res.json();
             const usersList = document.getElementById('users-list');
-            if (profiles.length === 0) {
-                usersList.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">No user profiles found yet. Users will appear here after they fill the onboarding form.</td></tr>';
-            } else {
-                usersList.innerHTML = profiles.map(p => `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-bold text-gray-900">${p.shopName}</div>
-                            <div class="text-xs text-gray-500">${p.ownerName}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">${p.phone}</div>
-                            <div class="text-xs text-gray-500 truncate max-w-xs">${p.address}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-3 py-1 ${p.role === 'agency' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'} rounded-full text-xs font-bold uppercase">${p.role.replace('_', ' ')}</span>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">${p.turnover}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500">${p.language}</td>
-                    </tr>
-                `).join('');
-            }
+            usersList.innerHTML = profiles.map(p => `
+                <tr>
+                    <td class="px-4 py-3 text-sm font-semibold text-gray-800">${p.shopName}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${p.phone}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${p.role}</td>
+                </tr>
+            `).join('');
         }
-
-        function renderVendors() {
-            const vendorsList = document.getElementById('vendors-list');
-            if (vendors.length === 0) {
-                vendorsList.innerHTML = '<tr><td colspan="3" class="px-6 py-12 text-center text-gray-400">No vendors found. Click "Add New Vendor" to start.</td></tr>';
-            } else {
-                vendorsList.innerHTML = vendors.map(v => `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 text-sm font-semibold text-gray-900">${v.name}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500 flex items-center">
-                            <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
-                            ${v.phone}
-                        </td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button onclick="editVendor('${v.id}')" class="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            </button>
-                            <button onclick="deleteVendor('${v.id}')" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-all" title="Delete">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h14"></path></svg>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        function renderItems() {
-            const itemsList = document.getElementById('items-list');
-            if (items.length === 0) {
-                itemsList.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">No items found. Click "Add New Item" to start.</td></tr>';
-            } else {
-                itemsList.innerHTML = items.map(item => {
-                    const vendor = vendors.find(v => v.id === item.vendorId);
-                    return `
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">${item.name}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
-                                <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold">${vendor ? vendor.name : 'Unknown'}</span>
-                            </td>
-                            <td class="px-6 py-4 text-sm font-bold text-gray-900">₹${parseFloat(item.price).toFixed(2)}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
-                                <span class="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">${item.category}</span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">${item.unit}</td>
-                            <td class="px-6 py-4 text-right space-x-2">
-                                <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-all" title="Delete">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h14"></path></svg>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-        }
-
-        function updateVendorDropdown() {
-            const vendorSelect = document.getElementById('item-vendor');
-            vendorSelect.innerHTML = '<option value="">Select a vendor...</option>' +
-                vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
-        }
-
-        function showSection(section) {
-            currentSection = section;
-            document.getElementById('users-section').classList.toggle('hidden', section !== 'users');
-            document.getElementById('items-section').classList.toggle('hidden', section !== 'items');
-            document.getElementById('vendors-section').classList.toggle('hidden', section !== 'vendors');
-
-            document.getElementById('nav-users').className = section === 'users' ? 'active-nav font-semibold pb-1 transition-all' : 'text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all';
-            document.getElementById('nav-items').className = section === 'items' ? 'active-nav font-semibold pb-1 transition-all' : 'text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all';
-            document.getElementById('nav-vendors').className = section === 'vendors' ? 'active-nav font-semibold pb-1 transition-all' : 'text-gray-500 hover:text-emerald-600 font-semibold pb-1 transition-all';
-        }
-
-        function openModal(type, editId = null) {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('modal').classList.add('flex');
-            document.getElementById('form-type').value = type;
-            document.getElementById('edit-id').value = editId || '';
-
-            document.getElementById('modal-title').textContent = editId ?
-                (type === 'item' ? 'Edit Item' : 'Edit Vendor') :
-                (type === 'item' ? 'Add New Item' : 'Add New Vendor');
-
-            document.getElementById('item-fields').classList.toggle('hidden', type !== 'item');
-            document.getElementById('vendor-fields').classList.toggle('hidden', type !== 'vendor');
-
-            if (editId) {
-                if (type === 'item') {
-                    const item = items.find(i => i.id === editId);
-                    document.getElementById('item-name').value = item.name;
-                    document.getElementById('item-price').value = item.price;
-                    document.getElementById('item-vendor').value = item.vendorId;
-                    document.getElementById('item-category').value = item.category;
-                    document.getElementById('item-unit').value = item.unit;
-                } else {
-                    const vendor = vendors.find(v => v.id === editId);
-                    document.getElementById('vendor-name').value = vendor.name;
-                    document.getElementById('vendor-phone').value = vendor.phone;
-                }
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-            document.getElementById('modal').classList.remove('flex');
-            document.getElementById('modal-form').reset();
-            document.getElementById('edit-id').value = '';
-        }
-
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const type = document.getElementById('form-type').value;
-            const editId = document.getElementById('edit-id').value;
-            const btn = document.getElementById('save-button');
-            const originalText = btn.textContent;
-
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
-
-            let data = {};
-            let endpoint = type === 'item' ? '/api/items' : '/api/vendors';
-            const method = editId ? 'PATCH' : 'POST';
-            if (editId) endpoint += `/${editId}`;
-
-            if (type === 'item') {
-                data = {
-                    vendorId: document.getElementById('item-vendor').value,
-                    name: document.getElementById('item-name').value,
-                    price: document.getElementById('item-price').value || "0.00",
-                    category: document.getElementById('item-category').value,
-                    unit: document.getElementById('item-unit').value,
-                };
-            } else {
-                data = {
-                    name: document.getElementById('vendor-name').value,
-                    phone: document.getElementById('vendor-phone').value.replace(/\D/g, '')
-                };
-            }
-
-            try {
-                const res = await fetch(endpoint, {
-                    method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (res.ok) {
-                    closeModal();
-                    loadData();
-                } else {
-                    const error = await res.json();
-                    alert("Error: " + (error.message || "Could not save data"));
-                }
-            } catch (err) {
-                alert("Network error. Is the server running?");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = originalText;
-            }
-        }
-
-        async function deleteItem(id) {
-            if (confirm('Delete this item permanently?')) {
-                const res = await fetch(`/api/items/${id}`, { method: 'DELETE' });
-                if (res.ok) loadData();
-            }
-        }
-
-        async function deleteVendor(id) {
-            if (confirm('Remove this vendor? (Their assigned items will remain in the database)')) {
-                const res = await fetch(`/api/vendors/${id}`, { method: 'DELETE' });
-                if (res.ok) loadData();
-            }
-        }
-
-        function editVendor(id) { openModal('vendor', id); }
-        function editItem(id) { openModal('item', id); }
-
-        loadData();
     </script>
 </body>
 </html>

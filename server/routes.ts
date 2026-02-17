@@ -4,10 +4,15 @@ import { storage } from "./storage";
 import { insertGroceryItemSchema, insertVendorSchema, insertProfileSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Profile
+  // Profiles
   app.get("/api/profile", async (_req, res) => {
     const profile = await storage.getProfile();
     res.json(profile || null);
+  });
+
+  app.get("/api/all-profiles", async (_req, res) => {
+    const profiles = await storage.getAllProfiles();
+    res.json(profiles);
   });
 
   app.post("/api/profile", async (req, res) => {
