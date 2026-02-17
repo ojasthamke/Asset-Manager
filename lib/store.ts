@@ -93,12 +93,8 @@ const PROFILE_KEY = "@quickorder_profile";
 
 // Helper to get the correct API URL
 function getBaseUrl() {
-  const host = process.env.EXPO_PUBLIC_DOMAIN;
-  if (host) return `https://${host}`;
-
-  // REPLACE '10.143.5.4' with your actual computer IPv4 address from 'ipconfig'
-  const computerIP = "10.143.5.4";
-  return `http://${computerIP}:5000`;
+  // Use the live production URL
+  return "https://quick-order-server-y11j.onrender.com";
 }
 
 export async function loadProfile(): Promise<Profile | null> {
