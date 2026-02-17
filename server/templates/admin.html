@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - QuickOrder Professional</title>
+    <title>QuickOrder Admin Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
         .active-nav { color: #10B981; border-bottom: 2px solid #10B981; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -19,66 +17,48 @@
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
         <div class="max-w-sm w-full bg-white p-8 rounded-2xl shadow-lg border border-emerald-100">
             <div class="flex justify-center mb-6">
-                <div class="bg-emerald-500 p-3 rounded-xl shadow-lg shadow-emerald-200">
+                <div class="bg-emerald-500 p-3 rounded-xl shadow-lg">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
             </div>
-            <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Admin Login</h2>
-            <p class="text-gray-500 text-center text-sm mb-8">Secure Access Required</p>
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Admin Login</h2>
             <form onsubmit="handleLogin(event)">
                 <div class="space-y-4">
                     <input type="text" id="username" placeholder="Username" class="w-full border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required>
                     <input type="password" id="password" placeholder="Password" class="w-full border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required>
                 </div>
-                <button type="submit" class="mt-8 w-full bg-emerald-500 text-white font-bold py-4 rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-100 transition-all active:scale-95">Login</button>
-                <p id="login-error" class="text-red-500 text-xs mt-4 text-center font-medium"></p>
+                <button type="submit" class="mt-8 w-full bg-emerald-500 text-white font-bold py-4 rounded-xl hover:bg-emerald-600 transition-all">Login</button>
+                <p id="login-error" class="text-red-500 text-xs mt-4 text-center"></p>
             </form>
         </div>
     </div>
 
     <!-- Main Admin Panel -->
     <div id="admin-panel" class="hidden">
-        <header class="bg-white border-b px-4 sm:px-6 py-4 shadow-sm sticky top-0 z-40">
+        <header class="bg-white border-b px-4 py-4 shadow-sm sticky top-0 z-40">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-emerald-500 p-2 rounded-lg">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h12l1 12H4L5 9z"></path></svg>
-                    </div>
-                    <h1 class="text-xl font-bold text-gray-900 tracking-tight">QuickOrder <span class="text-emerald-500">PRO</span></h1>
+                <div class="flex items-center gap-2">
+                    <div class="bg-emerald-500 p-1.5 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h12l1 12H4L5 9z"></path></svg></div>
+                    <h1 class="text-lg font-bold text-gray-900">QuickOrder Admin</h1>
                 </div>
-                <nav class="flex space-x-4 sm:space-x-8 text-xs sm:text-sm whitespace-nowrap overflow-x-auto w-full sm:w-auto justify-center sm:justify-start">
-                    <button id="nav-users" onclick="showSection('users')" class="active-nav font-bold pb-1 uppercase tracking-wider">Users</button>
-                    <button id="nav-vendors" onclick="showSection('vendors')" class="text-gray-500 hover:text-emerald-600 font-bold pb-1 uppercase tracking-wider">Vendors</button>
-                    <button id="nav-items" onclick="showSection('items')" class="text-gray-500 hover:text-emerald-600 font-bold pb-1 uppercase tracking-wider">Items</button>
-                    <button id="nav-transactions" onclick="showSection('transactions')" class="text-gray-500 hover:text-emerald-600 font-bold pb-1 uppercase tracking-wider">Orders</button>
+                <nav class="flex space-x-4 sm:space-x-8 text-xs sm:text-sm font-bold uppercase tracking-wider overflow-x-auto w-full sm:w-auto justify-center">
+                    <button id="nav-users" onclick="showSection('users')" class="active-nav pb-1">Users</button>
+                    <button id="nav-vendors" onclick="showSection('vendors')" class="text-gray-500 hover:text-emerald-600 pb-1">Vendors</button>
+                    <button id="nav-items" onclick="showSection('items')" class="text-gray-500 hover:text-emerald-600 pb-1">Items</button>
+                    <button id="nav-transactions" onclick="showSection('transactions')" class="text-gray-500 hover:text-emerald-600 pb-1">Transactions</button>
                 </nav>
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-
-            <!-- Dashboard Overview Stats (Visible on all tabs maybe? Let's just put it in Transactions for now or a header) -->
+        <main class="max-w-7xl mx-auto w-full p-4 sm:p-8">
 
             <!-- Users Section -->
-            <section id="users-section" class="tab-content active space-y-6">
-                <div class="flex justify-between items-end">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">App Users</h2>
-                        <p class="text-gray-500 text-sm">Monitor registered shop profiles</p>
-                    </div>
-                    <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
-                        <div class="text-[10px] font-bold text-gray-400 uppercase">Total Users</div>
-                        <div id="total-users-count" class="text-xl font-bold text-emerald-600">0</div>
-                    </div>
-                </div>
+            <section id="users-section" class="space-y-6">
+                <h2 class="text-xl font-bold text-gray-800">Registered Users (<span id="total-users-count">0</span>)</h2>
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                      <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr>
-                               <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Shop & Owner</th>
-                               <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contact & Address</th>
-                               <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Profile Details</th>
-                            </tr>
+                            <tr><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Shop & Owner</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Contact</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Profile Details</th></tr>
                         </thead>
                         <tbody id="users-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
@@ -86,23 +66,15 @@
             </section>
 
             <!-- Vendors Section -->
-            <section id="vendors-section" class="tab-content space-y-6">
+            <section id="vendors-section" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Vendors</h2>
-                        <p class="text-gray-500 text-sm">Manage supplier contacts</p>
-                    </div>
-                    <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all">+ Add Vendor</button>
+                    <h2 class="text-xl font-bold text-gray-800">Suppliers</h2>
+                    <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-100">+ Add Vendor</button>
                 </div>
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vendor Name</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">WhatsApp</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
-                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
+                            <tr><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Vendor Name</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">WhatsApp</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Status</th><th class="px-6 py-4 text-right">Actions</th></tr>
                         </thead>
                         <tbody id="vendors-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
@@ -110,27 +82,22 @@
             </section>
 
             <!-- Items Section -->
-            <section id="items-section" class="tab-content space-y-6">
+            <section id="items-section" class="hidden space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex space-x-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-                        <button id="tab-all-items" onclick="filterItems('all')" class="px-4 py-2 rounded-lg font-bold text-sm transition-all bg-emerald-500 text-white shadow-sm">All Items</button>
-                        <button id="tab-common-items" onclick="filterItems('common')" class="px-4 py-2 rounded-lg font-bold text-sm transition-all text-gray-500 hover:bg-gray-50">Common</button>
+                    <div class="flex space-x-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100 self-start">
+                        <button id="tab-all-items" onclick="filterItems('all')" class="px-4 py-2 rounded-lg font-bold text-xs bg-emerald-500 text-white shadow-sm">All</button>
+                        <button id="tab-common-items" onclick="filterItems('common')" class="px-4 py-2 rounded-lg font-bold text-xs text-gray-500 hover:bg-gray-50">Common</button>
                     </div>
-                    <div id="vendor-filter-info" class="hidden bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-between border border-emerald-100">
-                        <span id="filter-vendor-name">Filtering by Vendor</span>
-                        <button onclick="clearVendorFilter()" class="ml-4 text-emerald-900 bg-white px-2 py-1 rounded shadow-sm hover:bg-emerald-100 transition-all">✕</button>
+                    <div id="vendor-filter-info" class="hidden bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-between">
+                        <span id="filter-vendor-name"></span>
+                        <button onclick="clearVendorFilter()" class="ml-4 text-emerald-900 bg-white px-2 py-0.5 rounded shadow-sm hover:bg-emerald-100">✕</button>
                     </div>
                 </div>
                 <button onclick="openModal('item')" class="w-full sm:w-auto bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all">Add New Item</button>
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Item Name</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vendor</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
-                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
+                            <tr><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Item</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Vendor</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Price</th><th class="px-6 py-4 text-right">Actions</th></tr>
                         </thead>
                         <tbody id="items-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
@@ -138,25 +105,21 @@
             </section>
 
             <!-- Transactions Section -->
-            <section id="transactions-section" class="tab-content space-y-6">
+            <section id="transactions-section" class="hidden space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Order Analytics</h2>
-                        <p class="text-gray-500 text-sm">Sales and transaction monitoring</p>
-                    </div>
-                    <div class="flex gap-2 bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-                        <input type="date" id="start-date" class="border-0 bg-transparent text-sm focus:ring-0 outline-none">
-                        <span class="text-gray-300">to</span>
-                        <input type="date" id="end-date" class="border-0 bg-transparent text-sm focus:ring-0 outline-none">
-                        <button onclick="applyDateFilter()" class="bg-emerald-500 text-white px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-emerald-600 transition-all">Apply</button>
+                    <h2 class="text-xl font-bold text-gray-800">Order Transactions</h2>
+                    <div class="flex gap-2 bg-white p-2 rounded-xl shadow-sm border border-gray-100 w-full sm:w-auto overflow-x-auto">
+                        <input type="date" id="start-date" class="border-0 bg-transparent text-[10px] focus:ring-0 outline-none">
+                        <input type="date" id="end-date" class="border-0 bg-transparent text-[10px] focus:ring-0 outline-none">
+                        <button onclick="renderTransactions()" class="bg-emerald-500 text-white px-3 py-1 rounded-lg font-bold text-[10px]">Filter</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-emerald-500 p-6 rounded-2xl shadow-lg shadow-emerald-100 text-white">
-                        <div class="text-xs font-bold opacity-80 uppercase tracking-widest mb-1">Grand Revenue</div>
-                        <div id="grand-total-amount" class="text-3xl font-extrabold">₹0.00</div>
-                        <div id="grand-order-count" class="text-[10px] mt-2 font-bold opacity-90 uppercase">0 total orders received</div>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="bg-emerald-500 p-6 rounded-3xl shadow-xl shadow-emerald-100 text-white flex flex-col justify-center">
+                        <div class="text-[10px] font-bold opacity-80 uppercase tracking-widest mb-1">Grand Total Sales</div>
+                        <div id="grand-total-amount" class="text-3xl font-black">₹0.00</div>
+                        <div id="grand-order-count" class="text-[10px] mt-2 font-bold opacity-90 uppercase">0 total orders</div>
                     </div>
                     <div id="vendor-stats" class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
@@ -164,7 +127,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Date</th><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Amount</th><th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Status</th></tr>
+                            <tr><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Date</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Vendor</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Amount</th><th class="px-6 py-4 text-right text-[10px] font-bold text-gray-400 uppercase">Status</th></tr>
                         </thead>
                         <tbody id="orders-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
@@ -182,18 +145,15 @@
                 <input type="hidden" id="edit-id">
 
                 <div id="item-fields" class="space-y-5">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Select Vendors</label>
+                    <div id="vendor-checks-container">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2">Assign to Vendors</label>
                         <div id="vendor-checkboxes" class="border border-gray-100 rounded-xl p-3 space-y-2 max-h-40 overflow-y-auto bg-gray-50/50"></div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Item Information</label>
-                        <input type="text" id="item-name" placeholder="Item Name" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500" required>
-                    </div>
+                    <input type="text" id="item-name" placeholder="Item Name" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500" required>
                     <div class="grid grid-cols-2 gap-4">
                         <input type="number" step="0.01" id="item-price" placeholder="Price ₹" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500" required>
                         <select id="item-unit" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="g">Grams (g)</option><option value="kg">Kilograms (kg)</option><option value="litre">Litres (L)</option><option value="pieces">Pieces (pcs)</option><option value="bunch">Bunch</option><option value="tray">Tray</option><option value="packet">Packet</option>
+                            <option value="g">g</option><option value="kg">kg</option><option value="litre">L</option><option value="pieces">pcs</option>
                         </select>
                     </div>
                     <select id="item-category" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
@@ -203,16 +163,16 @@
 
                 <div id="vendor-fields" class="hidden space-y-5">
                     <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                    <input type="text" id="vendor-phone" placeholder="WhatsApp (9198...)" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                    <label class="flex items-center space-x-3 p-4 bg-emerald-50 rounded-xl border border-emerald-100 cursor-pointer group">
+                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                    <label class="flex items-center space-x-3 p-4 bg-emerald-50 rounded-xl cursor-pointer">
                         <input type="checkbox" id="vendor-special" class="w-5 h-5 rounded text-emerald-500 focus:ring-emerald-500">
-                        <span class="text-sm font-bold text-emerald-700 group-hover:text-emerald-800 transition-all">⭐ Mark as Special Vendor</span>
+                        <span class="text-sm font-bold text-emerald-700">⭐ Special Vendor Effect</span>
                     </label>
                 </div>
 
                 <div class="flex space-x-4 pt-6">
-                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all">Cancel</button>
-                    <button id="save-btn" type="submit" class="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-extrabold shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all active:scale-95">Save Changes</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all uppercase text-[10px]">Cancel</button>
+                    <button id="save-btn" type="submit" class="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all uppercase text-[10px]">Save Data</button>
                 </div>
             </form>
         </div>
@@ -226,7 +186,7 @@
             if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'password123') {
                 sessionStorage.setItem('isAdminAuthenticated', 'true');
                 showAdminPanel();
-            } else { document.getElementById('login-error').textContent = 'Invalid credentials. Access denied.'; }
+            } else { alert('Invalid Access Code'); }
         }
 
         function showAdminPanel() {
@@ -240,17 +200,9 @@
         function showSection(s) {
             ['users', 'vendors', 'items', 'transactions'].forEach(id => {
                 document.getElementById(`${id}-section`).classList.toggle('hidden', id !== s);
-                const navBtn = document.getElementById(`nav-${id}`);
-                navBtn.className = id === s ? 'active-nav font-bold pb-1 uppercase tracking-wider' : 'text-gray-500 hover:text-emerald-600 font-bold pb-1 uppercase tracking-wider';
+                const btn = document.getElementById(`nav-${id}`);
+                btn.className = id === s ? 'active-nav font-bold pb-1 uppercase tracking-wider text-emerald-600' : 'text-gray-500 hover:text-emerald-600 font-bold pb-1 uppercase tracking-wider';
             });
-        }
-
-        function filterItems(f) {
-            currentItemFilter = f; specificVendorFilter = null;
-            document.getElementById('vendor-filter-info').classList.add('hidden');
-            document.getElementById('tab-all-items').className = f === 'all' ? 'px-4 py-2 rounded-lg font-bold text-sm transition-all bg-emerald-500 text-white shadow-sm' : 'px-4 py-2 rounded-lg font-bold text-sm transition-all text-gray-500 hover:bg-gray-50';
-            document.getElementById('tab-common-items').className = f === 'common' ? 'px-4 py-2 rounded-lg font-bold text-sm transition-all bg-emerald-500 text-white shadow-sm' : 'px-4 py-2 rounded-lg font-bold text-sm transition-all text-gray-500 hover:bg-gray-50';
-            renderItems();
         }
 
         async function loadData() {
@@ -262,28 +214,26 @@
 
                 document.getElementById('total-users-count').textContent = profiles.length;
                 document.getElementById('users-list').innerHTML = profiles.map(p => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4"><div class="font-bold text-gray-900">${p.shopName}</div><div class="text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">${p.ownerName}</div></td>
-                        <td class="px-6 py-4 text-sm"><div>${p.phone}</div><div class="text-[10px] text-gray-400 font-medium truncate max-w-[180px]">${p.address}</div></td>
-                        <td class="px-6 py-4"><div class="text-[10px] font-extrabold text-emerald-600 uppercase">Role: ${p.role}</div><div class="text-[10px] text-gray-400 font-bold">GST: ${p.gst || 'N/A'}</div></td>
-                    </tr>`).join('');
+                    <tr><td class="px-6 py-4 font-bold text-gray-900">${p.shopName}<div class="text-[10px] text-emerald-500 font-black uppercase">${p.ownerName}</div></td>
+                    <td class="px-6 py-4 text-sm"><div>${p.phone}</div><div class="text-[10px] text-gray-400 font-medium truncate max-w-[180px]">${p.address}</div></td>
+                    <td class="px-6 py-4 uppercase text-[10px] font-black tracking-tighter text-gray-400">Role: ${p.role}<br>GST: ${p.gst || 'NONE'}<br>Turnover: ${p.turnover}</td></tr>`).join('');
 
                 document.getElementById('vendors-list').innerHTML = vendors.map(v => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 font-bold text-gray-900">${v.name}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500 font-medium">${v.phone}</td>
-                        <td class="px-6 py-4 uppercase text-[10px] font-black tracking-widest">${v.isSpecial ? '<span class="bg-emerald-500 text-white px-2 py-1 rounded">Special</span>' : '<span class="text-gray-300">Standard</span>'}</td>
-                        <td class="px-6 py-4 text-right space-x-3">
-                            <button onclick="manageVendorItems('${v.id}', '${v.name}')" class="text-emerald-600 font-bold text-[10px] uppercase hover:underline">Manage Items</button>
-                            <button onclick="editVendor('${v.id}')" class="text-blue-500 font-bold text-[10px] uppercase">Edit</button>
-                            <button onclick="deleteVendor('${v.id}')" class="text-red-500 font-bold text-[10px] uppercase">Delete</button>
-                        </td></tr>`).join('');
+                    <tr><td class="px-6 py-4 font-bold text-gray-900">${v.name}</td><td class="px-6 py-4 text-sm text-gray-500 font-medium">${v.phone}</td>
+                    <td class="px-6 py-4 uppercase text-[10px] font-black tracking-widest">${v.isSpecial ? '<span class="text-emerald-600">SPECIAL ⭐</span>' : '<span class="text-gray-300">STANDARD</span>'}</td>
+                    <td class="px-6 py-4 text-right space-x-3">
+                        <button onclick="manageVendorItems('${v.id}', '${v.name}')" class="text-emerald-600 font-black text-[10px] uppercase hover:underline">Manage Items</button>
+                        <button onclick="editVendor('${v.id}')" class="text-blue-500 font-black text-[10px] uppercase">Edit</button>
+                        <button onclick="deleteVendor('${v.id}')" class="text-red-500 font-black text-[10px] uppercase">Delete</button>
+                    </td></tr>`).join('');
 
-                document.getElementById('vendor-checkboxes').innerHTML = `<label class="flex items-center space-x-2 text-xs p-2 bg-emerald-50 rounded-lg cursor-pointer"><input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-700">COMMON (ALL VENDORS)</span></label>` +
-                    vendors.map(v => `<label class="flex items-center space-x-2 text-xs p-2 hover:bg-gray-50 rounded-lg cursor-pointer"><input type="checkbox" value="${v.id}" class="vendor-check"> <span>${v.name}</span></label>`).join('');
+                updateVendorCheckboxes(); renderItems(); renderTransactions();
+            } catch (e) { console.error("Sync Error", e); }
+        }
 
-                renderItems(); renderTransactions();
-            } catch (e) { console.error("Error loading data", e); }
+        function updateVendorCheckboxes() {
+            document.getElementById('vendor-checkboxes').innerHTML = `<label class="flex items-center space-x-2 text-[10px] p-2 bg-emerald-50 rounded-lg cursor-pointer font-black text-emerald-700"><input type="checkbox" value="common" class="vendor-check"> GLOBAL (ALL VENDORS)</label>` +
+                vendors.map(v => `<label class="flex items-center space-x-2 text-[10px] p-2 hover:bg-gray-50 rounded-lg cursor-pointer font-bold"><input type="checkbox" value="${v.id}" class="vendor-check"> ${v.name.toUpperCase()}</label>`).join('');
         }
 
         function renderItems() {
@@ -293,9 +243,8 @@
 
             document.getElementById('items-list').innerHTML = filtered.map(item => {
                 const v = vendors.find(v => v.id === item.vendorId);
-                return `<tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 font-bold text-gray-900">${item.name}</td>
-                    <td class="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-tighter">${item.vendorId === 'common' ? '<span class="text-emerald-500 bg-emerald-50 px-2 py-1 rounded">Global</span>' : (v ? v.name : '?')}</td>
+                return `<tr><td class="px-6 py-4 font-bold text-gray-900">${item.name}</td>
+                    <td class="px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-tighter">${item.vendorId === 'common' ? 'GLOBAL' : (v ? v.name : '?')}</td>
                     <td class="px-6 py-4 font-black text-gray-900">₹${item.price}</td>
                     <td class="px-6 py-4 text-right">
                         <button onclick="editItem('${item.id}')" class="text-blue-500 font-bold text-[10px] uppercase mr-4">Edit</button>
@@ -304,7 +253,7 @@
             }).join('');
         }
 
-        function manageVendorItems(vid, name) { specificVendorFilter = vid; document.getElementById('filter-vendor-name').textContent = `Supplier: ${name}`; document.getElementById('vendor-filter-info').classList.remove('hidden'); showSection('items'); renderItems(); }
+        function manageVendorItems(vid, name) { specificVendorFilter = vid; document.getElementById('filter-vendor-name').textContent = `MANAGING: ${name}`; document.getElementById('vendor-filter-info').classList.remove('hidden'); showSection('items'); renderItems(); }
         function clearVendorFilter() { specificVendorFilter = null; document.getElementById('vendor-filter-info').classList.add('hidden'); renderItems(); }
 
         function renderTransactions() {
@@ -316,27 +265,31 @@
 
             const grandTotal = filtered.reduce((sum, o) => sum + parseFloat(o.totalAmount), 0);
             document.getElementById('grand-total-amount').textContent = `₹${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-            document.getElementById('grand-order-count').textContent = `${filtered.length} total orders received`;
+            document.getElementById('grand-order-count').textContent = `${filtered.length} orders recorded`;
 
-            const stats = vendors.map(v => {
+            document.getElementById('vendor-stats').innerHTML = vendors.map(v => {
                 const vOrders = filtered.filter(o => o.vendorId === v.id);
                 const total = vOrders.reduce((sum, o) => sum + parseFloat(o.totalAmount), 0);
-                return { name: v.name, count: vOrders.length, total };
-            });
-
-            document.getElementById('vendor-stats').innerHTML = stats.map(s => `
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">${s.name}</h4>
-                    <div class="text-xl font-bold text-gray-900">₹${s.total.toLocaleString()}</div>
-                    <div class="text-[10px] font-bold text-emerald-500 mt-1">${s.count} ORDERS</div>
-                </div>`).join('');
+                return `<div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center">
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 truncate">${v.name}</h4>
+                    <div class="text-xl font-bold text-gray-900">₹${total.toLocaleString()}</div>
+                    <div class="text-[10px] font-bold text-emerald-500 mt-1">${vOrders.length} ORDERS</div>
+                </div>`;
+            }).join('');
 
             document.getElementById('orders-list').innerHTML = filtered.slice().reverse().map(o => {
                 const v = vendors.find(v => v.id === o.vendorId);
                 return `<tr><td class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase">${new Date(o.createdAt).toLocaleDateString()}</td>
-                <td class="px-6 py-4 text-sm font-bold text-gray-900">${v ? v.name : '?'}</td><td class="px-6 py-4 font-bold text-emerald-600">₹${o.totalAmount}</td>
-                <td class="px-6 py-4 text-right"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-[10px] font-black uppercase">Confirmed</span></td></tr>`;
+                <td class="px-6 py-4 text-sm font-bold text-gray-900">${v ? v.name : '?'}</td><td class="px-6 py-4 font-black text-emerald-600">₹${o.totalAmount}</td>
+                <td class="px-6 py-4 text-right"><span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-[10px] font-black uppercase">Success</span></td></tr>`;
             }).join('');
+        }
+
+        function filterItems(f) {
+            currentItemFilter = f; specificVendorFilter = null; document.getElementById('vendor-filter-info').classList.add('hidden');
+            document.getElementById('tab-all-items').className = f === 'all' ? 'px-4 py-2 rounded-lg font-bold text-xs bg-emerald-500 text-white shadow-sm' : 'px-4 py-2 rounded-lg font-bold text-xs text-gray-500 hover:bg-gray-50';
+            document.getElementById('tab-common-items').className = f === 'common' ? 'px-4 py-2 rounded-lg font-bold text-xs bg-emerald-500 text-white shadow-sm' : 'px-4 py-2 rounded-lg font-bold text-xs text-gray-500 hover:bg-gray-50';
+            renderItems();
         }
 
         function openModal(type, id = null) {
@@ -365,11 +318,11 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('save-btn');
-            btn.disabled = true; btn.textContent = 'Processing...';
+            btn.disabled = true; btn.textContent = 'SYNCING...';
             const type = document.getElementById('form-type').value;
             const editId = document.getElementById('edit-id').value;
-            const endpoint = (type === 'item' ? '/api/items' : '/api/vendors') + (editId ? `/${editId}` : '');
             const method = editId ? 'PATCH' : 'POST';
+            const endpoint = (type === 'item' ? '/api/items' : '/api/vendors') + (editId ? `/${editId}` : '');
 
             let body = {};
             if(type === 'item') {
@@ -393,16 +346,14 @@
 
             try {
                 const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-                if(res.ok) { closeModal(); await loadData(); } else { const err = await res.text(); alert('Server error: ' + err); }
-            } catch (err) { alert('Network connection failed'); }
-            finally { btn.disabled = false; btn.textContent = 'Save Changes'; }
+                if(res.ok) { closeModal(); await loadData(); } else { alert('Server rejection. Check fields.'); }
+            } catch (err) { alert('Network disruption.'); }
+            finally { btn.disabled = false; btn.textContent = 'Save Data'; }
         }
 
-        function editVendor(id) { openModal('vendor', id); }
-        function editItem(id) { openModal('item', id); }
-        async function deleteVendor(id) { if(confirm('Delete this vendor?')) { await fetch(`/api/vendors/${id}`, { method: 'DELETE' }); loadData(); } }
-        async function deleteItem(id) { if(confirm('Permanently remove item?')) { await fetch(`/api/items/${id}`, { method: 'DELETE' }); loadData(); } }
-        function applyDateFilter() { renderTransactions(); }
+        async function deleteVendor(id) { if(confirm('Permanently remove this vendor?')) { await fetch(`/api/vendors/${id}`, { method: 'DELETE' }); loadData(); } }
+        async function deleteItem(id) { if(confirm('Permanently remove this item?')) { await fetch(`/api/items/${id}`, { method: 'DELETE' }); loadData(); } }
+
         loadData();
     </script>
 </body>
