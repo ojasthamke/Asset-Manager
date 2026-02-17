@@ -25,9 +25,11 @@ export const CATEGORIES: Category[] = [
 
 export interface GroceryItem {
   id: string;
+  vendorId: string;
   name: string;
   unit: UnitType;
   category: Category;
+  price: string; // Price in Rupees
   imageKey?: string;
   selected: boolean;
   quantity: number;
@@ -37,6 +39,18 @@ export interface Vendor {
   id: string;
   name: string;
   phone: string;
+}
+
+export interface Profile {
+  id: string;
+  shopName: string;
+  ownerName: string;
+  phone: string;
+  address: string;
+  gst?: string;
+  turnover: string;
+  role: string;
+  language: string;
 }
 
 export interface OrderHistoryEntry {
@@ -75,39 +89,60 @@ const ITEMS_KEY = "@quickorder_items_v2";
 const VENDORS_KEY = "@quickorder_vendors";
 const RESTAURANT_KEY = "@quickorder_restaurant";
 const HISTORY_KEY = "@quickorder_history";
+const PROFILE_KEY = "@quickorder_profile";
 
-const DEFAULT_ITEMS: GroceryItem[] = [
-  { id: "1", name: "Onion", unit: "kg", category: "Vegetables", imageKey: "onion", selected: false, quantity: 1 },
-  { id: "2", name: "Tomato", unit: "kg", category: "Vegetables", imageKey: "tomato", selected: false, quantity: 1 },
-  { id: "3", name: "Potato", unit: "kg", category: "Vegetables", imageKey: "potato", selected: false, quantity: 1 },
-  { id: "4", name: "Green Chilli", unit: "kg", category: "Vegetables", imageKey: "green-chilli", selected: false, quantity: 1 },
-  { id: "5", name: "Paneer", unit: "kg", category: "Dairy", imageKey: "paneer", selected: false, quantity: 1 },
-  { id: "6", name: "Cheese", unit: "kg", category: "Dairy", imageKey: "cheese", selected: false, quantity: 1 },
-  { id: "7", name: "Butter", unit: "kg", category: "Dairy", imageKey: "butter", selected: false, quantity: 1 },
-  { id: "8", name: "Chicken", unit: "kg", category: "Meat & Eggs", imageKey: "chicken", selected: false, quantity: 1 },
-  { id: "9", name: "Eggs", unit: "tray", category: "Meat & Eggs", imageKey: "eggs", selected: false, quantity: 1 },
-  { id: "10", name: "Cooking Oil", unit: "litre", category: "Staples", imageKey: "cooking-oil", selected: false, quantity: 1 },
-  { id: "11", name: "Rice", unit: "kg", category: "Staples", imageKey: "rice", selected: false, quantity: 1 },
-  { id: "12", name: "Flour (Atta)", unit: "kg", category: "Staples", imageKey: "flour", selected: false, quantity: 1 },
-  { id: "13", name: "Coriander", unit: "bunch", category: "Spices & Herbs", imageKey: "coriander", selected: false, quantity: 1 },
-  { id: "14", name: "Ginger", unit: "kg", category: "Spices & Herbs", imageKey: "ginger", selected: false, quantity: 1 },
-  { id: "15", name: "Garlic", unit: "kg", category: "Spices & Herbs", imageKey: "garlic", selected: false, quantity: 1 },
-];
+// Helper to get the correct API URL
+function getBaseUrl() {
+  const host = process.env.EXPO_PUBLIC_DOMAIN;
+  if (host) return `https://${host}`;
 
-const DEFAULT_VENDORS: Vendor[] = [
-  { id: "1", name: "Ramesh Veg Supplier", phone: "919876543210" },
-  { id: "2", name: "Suresh Dairy", phone: "919876543211" },
-  { id: "3", name: "Chicken Center", phone: "919876543212" },
-];
+  // REPLACE '10.143.5.4' with your actual computer IPv4 address from 'ipconfig'
+  const computerIP = "10.143.5.4";
+  return `http://${computerIP}:5000`;
+}
 
-export async function loadItems(): Promise<GroceryItem[]> {
+export async function loadProfile(): Promise<Profile | null> {
   try {
-    const data = await AsyncStorage.getItem(ITEMS_KEY);
-    if (data) return JSON.parse(data);
-    await AsyncStorage.setItem(ITEMS_KEY, JSON.stringify(DEFAULT_ITEMS));
-    return DEFAULT_ITEMS;
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/profile`).catch(() => null);
+
+    if (response && response.ok) {
+      const profile = await response.json();
+      if (profile) {
+        await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        return profile;
+      }
+    }
+
+    const data = await AsyncStorage.getItem(PROFILE_KEY);
+    return data ? JSON.parse(data) : null;
   } catch {
-    return DEFAULT_ITEMS;
+    return null;
+  }
+}
+
+export async function loadItems(vendorId?: string): Promise<GroceryItem[]> {
+  try {
+    const baseUrl = getBaseUrl();
+    const url = vendorId ? `${baseUrl}/api/items?vendorId=${vendorId}` : `${baseUrl}/api/items`;
+    const response = await fetch(url).catch(() => null);
+
+    if (response && response.ok) {
+      const items = await response.json();
+      if (!vendorId) {
+        await AsyncStorage.setItem(ITEMS_KEY, JSON.stringify(items));
+      }
+      return items;
+    }
+
+    const data = await AsyncStorage.getItem(ITEMS_KEY);
+    const allItems: GroceryItem[] = data ? JSON.parse(data) : [];
+    if (vendorId) {
+      return allItems.filter(i => i.vendorId === vendorId);
+    }
+    return allItems;
+  } catch {
+    return [];
   }
 }
 
@@ -117,12 +152,19 @@ export async function saveItems(items: GroceryItem[]): Promise<void> {
 
 export async function loadVendors(): Promise<Vendor[]> {
   try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/vendors`).catch(() => null);
+
+    if (response && response.ok) {
+      const vendors = await response.json();
+      await AsyncStorage.setItem(VENDORS_KEY, JSON.stringify(vendors));
+      return vendors;
+    }
+
     const data = await AsyncStorage.getItem(VENDORS_KEY);
-    if (data) return JSON.parse(data);
-    await AsyncStorage.setItem(VENDORS_KEY, JSON.stringify(DEFAULT_VENDORS));
-    return DEFAULT_VENDORS;
+    return data ? JSON.parse(data) : [];
   } catch {
-    return DEFAULT_VENDORS;
+    return [];
   }
 }
 
@@ -132,6 +174,9 @@ export async function saveVendors(vendors: Vendor[]): Promise<void> {
 
 export async function loadRestaurantName(): Promise<string> {
   try {
+    const profile = await loadProfile();
+    if (profile) return profile.shopName;
+
     const name = await AsyncStorage.getItem(RESTAURANT_KEY);
     return name || "My Restaurant";
   } catch {
@@ -170,11 +215,17 @@ export function generateOrderMessage(
   const selected = items.filter((i) => i.selected);
   if (selected.length === 0) return "";
 
+  let totalAmount = 0;
   const itemLines = selected
-    .map((i) => `  \u2022 ${i.name} \u2013 ${i.quantity} ${getUnitLabel(i.unit)}`)
+    .map((i) => {
+      const price = parseFloat(i.price || "0");
+      const lineTotal = price * i.quantity;
+      totalAmount += lineTotal;
+      return `  \u2022 ${i.name} (${i.quantity} ${getUnitLabel(i.unit)}) - ₹${price.toFixed(2)} x ${i.quantity} = ₹${lineTotal.toFixed(2)}`;
+    })
     .join("\n");
 
-  return `Hello ${vendorName} \uD83D\uDC4B\nPlease send the following items:\n\n${itemLines}\n\nThank you\n- ${restaurantName}`;
+  return `Hello ${vendorName} \uD83D\uDC4B\n\nPlease send the following items:\n\n${itemLines}\n\n*Total Amount: ₹${totalAmount.toFixed(2)}*\n\nThank you\n- ${restaurantName}`;
 }
 
 export function getWhatsAppUrl(phone: string, message: string): string {

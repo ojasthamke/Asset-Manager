@@ -160,6 +160,15 @@ function serveLandingPage({
   res.status(200).send(html);
 }
 
+function serveAdminPage(res: Response) {
+  const adminPath = path.resolve(process.cwd(), "server", "templates", "admin.html");
+  if (!fs.existsSync(adminPath)) {
+    return res.status(404).send("Admin page not found");
+  }
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.sendFile(adminPath);
+}
+
 function configureExpoAndLanding(app: express.Application) {
   const templatePath = path.resolve(
     process.cwd(),
@@ -175,6 +184,10 @@ function configureExpoAndLanding(app: express.Application) {
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api")) {
       return next();
+    }
+
+    if (req.path === "/admin") {
+      return serveAdminPage(res);
     }
 
     if (req.path !== "/" && req.path !== "/manifest") {
@@ -241,7 +254,6 @@ function setupErrorHandler(app: express.Application) {
     {
       port,
       host: "0.0.0.0",
-      reusePort: true,
     },
     () => {
       log(`express server serving on port ${port}`);

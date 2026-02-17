@@ -57,20 +57,14 @@ export default function PreviewScreen() {
         message,
       });
 
-      const canOpen = await Linking.canOpenURL(whatsappUrl);
-      if (canOpen) {
-        await Linking.openURL(whatsappUrl);
-      } else if (Platform.OS === "web") {
-        const webUrl = `https://web.whatsapp.com/send?phone=${vendor.phone}&text=${encodeURIComponent(message)}`;
-        await Linking.openURL(webUrl);
-      } else {
-        Alert.alert("WhatsApp not found", "Please install WhatsApp to send orders.");
-      }
-
+      await Linking.openURL(whatsappUrl);
       resetSelections();
       router.dismissAll();
     } catch {
-      Alert.alert("Error", "Could not open WhatsApp. Please try again.");
+      Alert.alert(
+        "Could not open WhatsApp",
+        "Please make sure you have WhatsApp installed to send orders. If the problem continues, try restarting your phone."
+      );
     }
   };
 

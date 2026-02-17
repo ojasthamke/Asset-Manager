@@ -25,6 +25,7 @@ interface OrderContextValue {
   toggleItem: (id: string) => void;
   setItemQuantity: (id: string, quantity: number) => void;
   setItemUnit: (id: string, unit: UnitType) => void;
+  setItemsDirectly: (newItems: GroceryItem[]) => void; // New function
   selectAllItems: () => void;
   deselectAllItems: () => void;
   addItem: (name: string, unit: UnitType, category: Category) => void;
@@ -69,7 +70,6 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       const updated = prev.map((item) =>
         item.id === id ? { ...item, selected: !item.selected } : item,
       );
-      saveItems(updated);
       return updated;
     });
   };
@@ -80,7 +80,6 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       const updated = prev.map((item) =>
         item.id === id ? { ...item, quantity: Math.max(0.5, quantity) } : item,
       );
-      saveItems(updated);
       return updated;
     });
   };
@@ -90,15 +89,17 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       const updated = prev.map((item) =>
         item.id === id ? { ...item, unit } : item,
       );
-      saveItems(updated);
       return updated;
     });
+  };
+
+  const setItemsDirectly = (newItems: GroceryItem[]) => {
+    setItems(newItems);
   };
 
   const selectAllItems = () => {
     setItems((prev) => {
       const updated = prev.map((item) => ({ ...item, selected: true }));
-      saveItems(updated);
       return updated;
     });
   };
@@ -106,7 +107,6 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   const deselectAllItems = () => {
     setItems((prev) => {
       const updated = prev.map((item) => ({ ...item, selected: false }));
-      saveItems(updated);
       return updated;
     });
   };
@@ -114,25 +114,18 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   const addItem = (name: string, unit: UnitType, category: Category) => {
     const newItem: GroceryItem = {
       id: Crypto.randomUUID(),
+      vendorId: "", // This will be set by the caller or admin
       name,
       unit,
       category,
       selected: false,
       quantity: 1,
     };
-    setItems((prev) => {
-      const updated = [...prev, newItem];
-      saveItems(updated);
-      return updated;
-    });
+    setItems((prev) => [...prev, newItem]);
   };
 
   const removeItem = (id: string) => {
-    setItems((prev) => {
-      const updated = prev.filter((item) => item.id !== id);
-      saveItems(updated);
-      return updated;
-    });
+    setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const addVendor = (name: string, phone: string) => {
@@ -141,29 +134,17 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       name,
       phone,
     };
-    setVendors((prev) => {
-      const updated = [...prev, newVendor];
-      saveVendors(updated);
-      return updated;
-    });
+    setVendors((prev) => [...prev, newVendor]);
   };
 
   const removeVendor = (id: string) => {
-    setVendors((prev) => {
-      const updated = prev.filter((v) => v.id !== id);
-      saveVendors(updated);
-      return updated;
-    });
+    setVendors((prev) => prev.filter((v) => v.id !== id));
   };
 
   const updateVendor = (id: string, name: string, phone: string) => {
-    setVendors((prev) => {
-      const updated = prev.map((v) =>
-        v.id === id ? { ...v, name, phone } : v,
-      );
-      saveVendors(updated);
-      return updated;
-    });
+    setVendors((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, name, phone } : v)),
+    );
   };
 
   const updateRestaurantName = (name: string) => {
@@ -172,15 +153,13 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   };
 
   const resetSelections = () => {
-    setItems((prev) => {
-      const updated = prev.map((item) => ({
+    setItems((prev) =>
+      prev.map((item) => ({
         ...item,
         selected: false,
         quantity: 1,
-      }));
-      saveItems(updated);
-      return updated;
-    });
+      })),
+    );
   };
 
   const addHistoryEntry = (entry: Omit<OrderHistoryEntry, "id">) => {
@@ -218,6 +197,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       toggleItem,
       setItemQuantity,
       setItemUnit,
+      setItemsDirectly,
       selectAllItems,
       deselectAllItems,
       addItem,

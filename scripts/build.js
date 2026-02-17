@@ -52,10 +52,10 @@ function getDeploymentDomain() {
     return stripProtocol(process.env.EXPO_PUBLIC_DOMAIN);
   }
 
-  console.error(
-    "ERROR: No deployment domain found. Set REPLIT_INTERNAL_APP_DOMAIN, REPLIT_DEV_DOMAIN, or EXPO_PUBLIC_DOMAIN",
+  console.warn(
+    "WARN: No deployment domain found. Defaulting to 'localhost:5000' for local build. If you are deploying, set REPLIT_INTERNAL_APP_DOMAIN, REPLIT_DEV_DOMAIN, or EXPO_PUBLIC_DOMAIN."
   );
-  process.exit(1);
+  return "localhost:5000";
 }
 
 function prepareDirectories(timestamp) {
@@ -118,10 +118,12 @@ async function startMetro(expoPublicDomain) {
     ...process.env,
     EXPO_PUBLIC_DOMAIN: expoPublicDomain,
   };
-  metroProcess = spawn("npm", ["run", "expo:start:static:build"], {
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  metroProcess = spawn(npmCmd, ["run", "expo:start:static:build"], {
     stdio: ["ignore", "pipe", "pipe"],
     detached: false,
     env,
+    shell: true,
   });
 
   if (metroProcess.stdout) {

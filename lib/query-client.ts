@@ -2,19 +2,24 @@ import { fetch } from "expo/fetch";
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 /**
- * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
- * @returns {string} The API base URL
+ * Gets the base URL for the Express API server
  */
 export function getApiUrl(): string {
-  let host = process.env.EXPO_PUBLIC_DOMAIN;
+  // 1. If we are in production (hosted), use the hosted URL
+  // REPLACE this with your Render URL after Step 4 (e.g., https://quickorder.onrender.com)
+  const productionUrl = "https://your-app-name.onrender.com";
 
-  if (!host) {
-    throw new Error("EXPO_PUBLIC_DOMAIN is not set");
+  if (!__DEV__) {
+    return productionUrl;
   }
 
-  let url = new URL(`https://${host}`);
+  // 2. Local development
+  let host = process.env.EXPO_PUBLIC_DOMAIN;
+  if (host) return `https://${host}`;
 
-  return url.href;
+  // Fallback to local IP
+  const computerIP = "10.143.5.4";
+  return `http://${computerIP}:5000`;
 }
 
 async function throwIfResNotOk(res: Response) {
@@ -70,7 +75,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 0,
       retry: false,
     },
     mutations: {
