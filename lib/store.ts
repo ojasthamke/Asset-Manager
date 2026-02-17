@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ImageSourcePropType } from "react-native";
 
 export type UnitType = "g" | "kg" | "litre" | "pieces" | "bunch" | "tray" | "packet";
 
@@ -73,45 +72,66 @@ function getBaseUrl() {
   return "https://quick-order-server-y11j.onrender.com";
 }
 
+// Increased timeout for Render free tier wakeup (30 seconds)
+const FETCH_TIMEOUT = 30000;
+
 export async function loadProfile(): Promise<Profile | null> {
+  const loadFromCache = async () => {
+    try {
+      const data = await AsyncStorage.getItem(PROFILE_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  };
+
   try {
     const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/profile`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
+    const response = await fetch(`${baseUrl}/api/profile`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT)
+    });
 
-    if (response && response.ok) {
+    if (response.ok) {
       const profile = await response.json();
       if (profile) {
         await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
         return profile;
       }
     }
-
-    const data = await AsyncStorage.getItem(PROFILE_KEY);
-    return data ? JSON.parse(data) : null;
-  } catch {
-    const data = await AsyncStorage.getItem(PROFILE_KEY);
-    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    // Fallback to cache
   }
+
+  return loadFromCache();
 }
 
 export async function loadItems(vendorId: string): Promise<GroceryItem[]> {
   const cacheKey = getVendorItemsKey(vendorId);
+  const loadFromCache = async () => {
+    try {
+      const data = await AsyncStorage.getItem(cacheKey);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  };
+
   try {
     const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/items?vendorId=${vendorId}`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
+    const response = await fetch(`${baseUrl}/api/items?vendorId=${vendorId}`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT)
+    });
 
-    if (response && response.ok) {
+    if (response.ok) {
       const items = await response.json();
       await AsyncStorage.setItem(cacheKey, JSON.stringify(items));
       return items;
     }
-
-    const data = await AsyncStorage.getItem(cacheKey);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    const data = await AsyncStorage.getItem(cacheKey);
-    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    // Fallback to cache
   }
+
+  return loadFromCache();
 }
 
 export async function saveItems(items: GroceryItem[]): Promise<void> {
@@ -119,22 +139,29 @@ export async function saveItems(items: GroceryItem[]): Promise<void> {
 }
 
 export async function loadVendors(): Promise<Vendor[]> {
+    const loadFromCache = async () => {
+    try {
+      const data = await AsyncStorage.getItem(VENDORS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  };
   try {
     const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/vendors`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
+    const response = await fetch(`${baseUrl}/api/vendors`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT)
+    });
 
-    if (response && response.ok) {
+    if (response.ok) {
       const vendors = await response.json();
       await AsyncStorage.setItem(VENDORS_KEY, JSON.stringify(vendors));
       return vendors;
     }
-
-    const data = await AsyncStorage.getItem(VENDORS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    const data = await AsyncStorage.getItem(VENDORS_KEY);
-    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    // Fallback to cache
   }
+  return loadFromCache();
 }
 
 export async function saveVendors(vendors: Vendor[]): Promise<void> {

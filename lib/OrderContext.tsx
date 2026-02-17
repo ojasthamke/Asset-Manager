@@ -51,10 +51,11 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<OrderHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. Instant Load from Local Storage
   useEffect(() => {
-    async function loadLocalData() {
+    async function loadInitialData() {
+      setIsLoading(true);
       try {
+        // Load from cache first to show something on screen quickly
         const [localVendors, localProfile, localHistory] = await Promise.all([
           AsyncStorage.getItem(VENDORS_KEY),
           AsyncStorage.getItem(PROFILE_KEY),
@@ -67,15 +68,17 @@ export function OrderProvider({ children }: { children: ReactNode }) {
           setRestaurantName(p.shopName || "My Restaurant");
         }
         setHistory(localHistory);
+
+        // Now sync with the cloud.
+        await refreshData();
       } catch (e) {
-        console.error("Local load failed", e);
+        console.error("Initial data load failed", e);
       } finally {
+        // Only set loading to false after the cloud sync has also finished.
         setIsLoading(false);
-        // 2. Background Sync with Cloud
-        refreshData();
       }
     }
-    loadLocalData();
+    loadInitialData();
   }, []);
 
   const refreshData = async () => {
@@ -84,10 +87,15 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         loadVendors(),
         loadProfile(),
       ]);
-      if (cloudVendors && cloudVendors.length > 0) setVendors(cloudVendors);
+
+      // loadVendors/loadProfile will return cached data on network failure,
+      // so we can just set state with whatever they return.
+      setVendors(cloudVendors);
       if (cloudProfile) setRestaurantName(cloudProfile.shopName);
+
     } catch (e) {
-      console.warn("Background sync failed (Server likely waking up)");
+      // This will mostly catch programming errors, as loadVendors/loadProfile swallow network errors.
+      console.warn("Background sync failed:", e);
     }
   };
 
