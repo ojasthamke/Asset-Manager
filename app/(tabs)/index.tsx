@@ -79,29 +79,6 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { vendors, isLoading } = useOrder();
   const [refreshing, setRefreshing] = useState(false);
-  const [isWakingUp, setIsWakingUp] = useState(false);
-
-  useEffect(() => {
-    const checkConnection = async () => {
-      if (vendors.length > 0) {
-        setIsWakingUp(false);
-        return;
-      }
-      try {
-        const baseUrl = getApiUrl();
-        const response = await fetch(`${baseUrl}/api/health`, {
-          method: 'GET',
-          signal: AbortSignal.timeout(10000)
-        });
-        if (response.ok) setIsWakingUp(false);
-      } catch (error) {
-        setIsWakingUp(true);
-      }
-    };
-    checkConnection();
-    const interval = setInterval(checkConnection, 10000);
-    return () => clearInterval(interval);
-  }, [vendors]);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -119,16 +96,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {isWakingUp && vendors.length === 0 && (
-        <Animated.View entering={SlideInUp} exiting={SlideOutUp} style={[styles.offlineBanner, { backgroundColor: theme.tint + '10', borderBottomColor: theme.tint + '20' }]}>
-          <ActivityIndicator size="small" color={theme.tint} style={{ marginRight: 8 }} />
-          <Text style={[styles.offlineText, { color: theme.tint, fontFamily: 'Poppins_600SemiBold' }]}>
-            Connecting to secure cloud...
-          </Text>
-        </Animated.View>
-      )}
-
-      <View style={[styles.header, { paddingTop: insets.top + (isWakingUp && vendors.length === 0 ? 50 : 10) }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <Text style={[styles.headerTitle, { color: theme.text, fontFamily: "Poppins_800ExtraBold" }]}>
           QuickOrder
         </Text>
@@ -150,13 +118,13 @@ export default function HomeScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <View style={[styles.emptyIconContainer, { backgroundColor: theme.inputBg }]}>
-              <Ionicons name={isWakingUp ? "cloud-download-outline" : "people-outline"} size={48} color={theme.textSecondary} />
+              <Ionicons name="people-outline" size={48} color={theme.textSecondary} />
             </View>
             <Text style={[styles.emptyText, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>
-              {isWakingUp ? "Preparing your data" : "No Vendors Found"}
+              No Vendors Found
             </Text>
             <Text style={[styles.emptySubtext, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-              {isWakingUp ? "The cloud server is starting up. This usually takes 30 seconds." : "Add vendors using the Admin Panel to see them here."}
+              Add vendors using the Admin Panel to see them here.
             </Text>
           </View>
         }
@@ -168,20 +136,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  offlineBanner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingTop: 45,
-    paddingBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomWidth: 1,
-    zIndex: 100,
-  },
-  offlineText: { fontSize: 12 },
   header: { paddingHorizontal: 24, paddingBottom: 20 },
   headerTitle: { fontSize: 32, letterSpacing: -0.5 },
   headerSubtitle: { fontSize: 14, opacity: 0.7, marginTop: 4 },

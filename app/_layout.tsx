@@ -4,7 +4,6 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { OrderProvider } from "@/lib/OrderContext";
@@ -22,7 +21,6 @@ SplashScreen.preventAutoHideAsync();
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="onboarding" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="vendor-items" />
       <Stack.Screen name="preview" />
@@ -43,39 +41,20 @@ export default function RootLayout() {
   const segments = useSegments();
 
   useEffect(() => {
-    async function checkOnboarding() {
-      try {
-        const onboardingComplete = await AsyncStorage.getItem("@onboarding_complete");
-        const inOnboardingGroup = segments[0] === "onboarding";
-
-        if (onboardingComplete !== "true") {
-          // If not complete, force to onboarding
-          if (!inOnboardingGroup) {
-            router.replace("/onboarding");
-          }
-        } else {
-          // If complete, force to main app if trying to go to onboarding
-          if (inOnboardingGroup) {
-            router.replace("/(tabs)");
-          }
-        }
-      } catch (e) {
-        console.error("Onboarding check failed", e);
-      } finally {
-        setAppIsReady(true);
-      }
-    }
-
     if (fontsLoaded || fontError) {
-      checkOnboarding();
+      setAppIsReady(true);
     }
-  }, [fontsLoaded, fontError, segments]);
+  }, [fontsLoaded, fontError]);
 
   useEffect(() => {
     if (appIsReady) {
       SplashScreen.hideAsync().catch(() => {});
+      // Redirect to (tabs) if in a root state that might have been onboarding
+      if (segments.length === 0 || segments[0] === "onboarding") {
+        router.replace("/(tabs)");
+      }
     }
-  }, [appIsReady]);
+  }, [appIsReady, segments]);
 
   if (!fontsLoaded && !fontError) return null;
   if (!appIsReady) return null;

@@ -79,8 +79,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/vendors/:id", async (req, res) => {
-    await storage.deleteVendor(req.params.id);
-    res.status(204).end();
+    try {
+      await storage.deleteVendor(req.params.id);
+      res.status(204).end();
+    } catch (error: any) {
+      console.error("Error deleting vendor:", error);
+      res.status(500).json({ error: error.message || "Failed to delete vendor" });
+    }
   });
 
   // Orders

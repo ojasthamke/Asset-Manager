@@ -42,14 +42,17 @@ export default function PreviewScreen() {
   const message = generateOrderMessage(selectedItems, vendor.name, restaurantName);
   const whatsappUrl = getWhatsAppUrl(vendor.phone, message);
 
-  // Calculate total amount for the order record
   const totalAmount = selectedItems.reduce((sum, i) => sum + (parseFloat(i.price || "0") * i.quantity), 0);
 
   const handleSend = async () => {
+    const canOpen = await Linking.canOpenURL(whatsappUrl);
+    if (!canOpen) {
+      Alert.alert("Cannot Open WhatsApp", "It seems WhatsApp is not installed on your device or the link is invalid.");
+      return;
+    }
+
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-      // 1. Record the transaction on the server
       try {
         const baseUrl = getApiUrl();
         await fetch(`${baseUrl}/api/orders`, {
@@ -61,32 +64,22 @@ export default function PreviewScreen() {
             itemsCount: selectedItems.length,
           }),
         });
-      } catch (e) {
-        console.warn("Failed to record order on server, but proceeding to WhatsApp", e);
-      }
+      } catch (e) { console.warn("Failed to record order on server", e); }
 
-      // 2. Add to local history
       addHistoryEntry({
         date: new Date().toISOString(),
         vendorName: vendor.name,
         vendorPhone: vendor.phone,
-        items: selectedItems.map((i) => ({
-          name: i.name,
-          quantity: i.quantity,
-          unit: getUnitLabel(i.unit),
-        })),
+        items: selectedItems.map((i) => ({ name: i.name, quantity: i.quantity, unit: getUnitLabel(i.unit), price: i.price })),
         message,
       });
 
-      // 3. Open WhatsApp
       await Linking.openURL(whatsappUrl);
       resetSelections();
       router.dismissAll();
-    } catch {
-      Alert.alert(
-        "Could not open WhatsApp",
-        "Please make sure you have WhatsApp installed to send orders."
-      );
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "An unexpected error occurred.");
     }
   };
 
@@ -94,123 +87,55 @@ export default function PreviewScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View
-        style={[
-          styles.header,
-          {
-            paddingTop: (insets.top || webTopInset) + 8,
-            backgroundColor: theme.background,
-          },
-        ]}
-      >
+      <View style={[styles.header, { paddingTop: (insets.top || webTopInset) + 8, backgroundColor: theme.background }]}>
         <View style={styles.headerRow}>
-          <Pressable
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1, backgroundColor: theme.surface }]}
-          >
+          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1, backgroundColor: theme.surface }]}>
             <Ionicons name="arrow-back" size={22} color={theme.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.headerTitle, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>
-              Order Preview
-            </Text>
-            <Text style={[styles.headerSubtitle, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-              Review before sending
-            </Text>
+            <Text style={[styles.headerTitle, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>Order Preview</Text>
+            <Text style={[styles.headerSubtitle, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>Review before sending</Text>
           </View>
         </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 130 }]}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: 130 }]} showsVerticalScrollIndicator={false}>
         <View style={[styles.vendorBanner, { backgroundColor: theme.tint + "10", borderColor: theme.tint + "30" }]}>
-          <View style={[styles.vendorIcon, { backgroundColor: theme.tint + "20" }]}>
-            <Ionicons name="storefront-outline" size={22} color={theme.tint} />
-          </View>
+          <View style={[styles.vendorIcon, { backgroundColor: theme.tint + "20" }]}><Ionicons name="storefront-outline" size={22} color={theme.tint} /></View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.vendorBannerName, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]}>
-              {vendor.name}
-            </Text>
-            <Text style={[styles.vendorBannerPhone, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-              +{vendor.phone}
-            </Text>
+            <Text style={[styles.vendorBannerName, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]}>{vendor.name}</Text>
+            <Text style={[styles.vendorBannerPhone, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>+{vendor.phone}</Text>
           </View>
-          <View style={[styles.whatsappBadge, { backgroundColor: theme.whatsapp }]}>
-            <Ionicons name="logo-whatsapp" size={16} color="#fff" />
-          </View>
+          <View style={[styles.whatsappBadge, { backgroundColor: theme.whatsapp }]}><Ionicons name="logo-whatsapp" size={16} color="#fff" /></View>
         </View>
 
         <View style={[styles.messageCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.messageHeader}>
             <Ionicons name="chatbubble-outline" size={16} color={theme.tint} />
-            <Text style={[styles.messageLabel, { color: theme.tint, fontFamily: "Poppins_600SemiBold" }]}>
-              Message Preview
-            </Text>
+            <Text style={[styles.messageLabel, { color: theme.tint, fontFamily: "Poppins_600SemiBold" }]}>Message Preview</Text>
           </View>
           <View style={[styles.messageBubble, { backgroundColor: theme.inputBg }]}>
-            <Text style={[styles.messageText, { color: theme.text, fontFamily: "Poppins_400Regular" }]} selectable>
-              {message}
-            </Text>
+            <Text style={[styles.messageText, { color: theme.text, fontFamily: "Poppins_400Regular" }]} selectable>{message}</Text>
           </View>
         </View>
 
         <View style={styles.itemsSummary}>
-          <Text style={[styles.summaryTitle, { color: theme.textSecondary, fontFamily: "Poppins_500Medium" }]}>
-            Items ({selectedItems.length})
-          </Text>
+          <Text style={[styles.summaryTitle, { color: theme.textSecondary, fontFamily: "Poppins_500Medium" }]}>Items ({selectedItems.length})</Text>
           <View style={[styles.summaryCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             {selectedItems.map((item, index) => (
-              <View
-                key={item.id}
-                style={[
-                  styles.summaryItem,
-                  index < selectedItems.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border },
-                ]}
-              >
-                <View style={styles.summaryItemLeft}>
-                  <View style={[styles.summaryDot, { backgroundColor: theme.tint }]} />
-                  <Text style={[styles.summaryItemName, { color: theme.text, fontFamily: "Poppins_400Regular" }]}>
-                    {item.name}
-                  </Text>
-                </View>
-                <View style={[styles.qtyBadge, { backgroundColor: theme.tint + "12" }]}>
-                  <Text style={[styles.summaryItemQty, { color: theme.tint, fontFamily: "Poppins_600SemiBold" }]}>
-                    {item.quantity} {getUnitLabel(item.unit)}
-                  </Text>
-                </View>
+              <View key={item.id} style={[styles.summaryItem, index < selectedItems.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border }]}>
+                <View style={styles.summaryItemLeft}><View style={[styles.summaryDot, { backgroundColor: theme.tint }]} /><Text style={[styles.summaryItemName, { color: theme.text, fontFamily: "Poppins_400Regular" }]}>{item.name}</Text></View>
+                <View style={[styles.qtyBadge, { backgroundColor: theme.tint + "12" }]}><Text style={[styles.summaryItemQty, { color: theme.tint, fontFamily: "Poppins_600SemiBold" }]}>{item.quantity} {getUnitLabel(item.unit)}</Text></View>
               </View>
             ))}
           </View>
         </View>
       </ScrollView>
 
-      <View
-        style={[
-          styles.bottomBar,
-          {
-            paddingBottom: (insets.bottom || (Platform.OS === "web" ? 34 : 0)) + 12,
-            backgroundColor: theme.surface,
-            borderTopColor: theme.border,
-          },
-        ]}
-      >
-        <Pressable
-          onPress={handleSend}
-          style={({ pressed }) => [
-            styles.sendButton,
-            {
-              backgroundColor: theme.whatsapp,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.97 : 1 }],
-            },
-          ]}
-        >
+      <View style={[styles.bottomBar, { paddingBottom: (insets.bottom || (Platform.OS === "web" ? 34 : 0)) + 12, backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+        <Pressable onPress={handleSend} style={({ pressed }) => [styles.sendButton, { backgroundColor: theme.whatsapp, opacity: pressed ? 0.9 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
           <Ionicons name="logo-whatsapp" size={24} color="#fff" />
-          <Text style={[styles.sendButtonText, { fontFamily: "Poppins_700Bold" }]}>
-            Send via WhatsApp
-          </Text>
+          <Text style={[styles.sendButtonText, { fontFamily: "Poppins_700Bold" }]}>Send via WhatsApp</Text>
         </Pressable>
       </View>
     </View>
@@ -226,14 +151,7 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 13, marginTop: 2 },
   retryBtn: { marginTop: 16, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
   scrollContent: { padding: 20, gap: 16 },
-  vendorBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
+  vendorBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, borderWidth: 1 },
   vendorIcon: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   vendorBannerName: { fontSize: 16 },
   vendorBannerPhone: { fontSize: 12, marginTop: 2 },
@@ -246,34 +164,13 @@ const styles = StyleSheet.create({
   itemsSummary: {},
   summaryTitle: { fontSize: 12, marginBottom: 8, textTransform: "uppercase" as const, letterSpacing: 0.5 },
   summaryCard: { borderRadius: 16, borderWidth: 1, overflow: "hidden" },
-  summaryItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-  },
+  summaryItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 12, paddingHorizontal: 14 },
   summaryItemLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
   summaryDot: { width: 6, height: 6, borderRadius: 3 },
   summaryItemName: { fontSize: 14 },
   qtyBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   summaryItemQty: { fontSize: 13 },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    borderTopWidth: 1,
-  },
-  sendButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    paddingVertical: 18,
-    borderRadius: 16,
-  },
+  bottomBar: { position: "absolute", bottom: 0, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1 },
+  sendButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 18, borderRadius: 16 },
   sendButtonText: { color: "#fff", fontSize: 18 },
 });

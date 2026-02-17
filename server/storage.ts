@@ -93,6 +93,9 @@ export class DatabaseStorage implements IStorage {
     return vendor!;
   }
   async deleteVendor(id: string): Promise<void> {
+    // Delete items associated with this vendor first
+    await this.db.delete(groceryItems).where(eq(groceryItems.vendorId, id));
+    // Then delete the vendor
     await this.db.delete(vendors).where(eq(vendors.id, id));
   }
   async getOrders(): Promise<Order[]> {
@@ -134,7 +137,14 @@ export class MemStorage implements IStorage {
   async getVendors() { return Array.from(this.vendors.values()); }
   async createVendor(v: InsertVendor) { const id = (this.currentId++).toString(); const vendor = { ...v, id, isSpecial: v.isSpecial ?? false }; this.vendors.set(id, vendor); return vendor; }
   async updateVendor(id: string, u: Partial<InsertVendor>) { const vendor = this.vendors.get(id); const updated = { ...vendor!, ...u }; this.vendors.set(id, updated); return updated; }
-  async deleteVendor(id: string) { this.vendors.delete(id); }
+  async deleteVendor(id: string) {
+    // Delete items associated with this vendor
+    const itemsToDelete = Array.from(this.groceryItems.values()).filter(i => i.vendorId === id);
+    for (const item of itemsToDelete) {
+      this.groceryItems.delete(item.id);
+    }
+    this.vendors.delete(id);
+  }
   async getOrders() { return Array.from(this.orders.values()); }
   async createOrder(o: InsertOrder) { const id = (this.currentId++).toString(); const order = { ...o, id, totalAmount: o.totalAmount.toString(), createdAt: new Date() }; this.orders.set(id, order); return order; }
 }
