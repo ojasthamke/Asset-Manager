@@ -43,94 +43,57 @@
         </header>
 
         <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-            <!-- Users Section -->
+            <!-- Sections -->
             <section id="users-section">
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                      <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr>
-                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Shop & Owner</th>
-                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Contact & Address</th>
-                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Profile Details</th>
-                            </tr>
+                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Shop</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Contact</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Details</th></tr>
                         </thead>
                         <tbody id="users-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Vendors Section -->
             <section id="vendors-section" class="hidden space-y-6">
-                <div class="flex space-x-4 border-b">
-                    <button id="tab-all-vendors" onclick="filterVendors('all')" class="border-b-2 border-emerald-500 px-4 py-2 font-bold text-emerald-600">All Vendors</button>
-                    <button id="tab-special-vendors" onclick="filterVendors('special')" class="px-4 py-2 text-gray-500 hover:text-emerald-600 font-bold">Special Vendors</button>
-                </div>
-                <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Vendor</button>
+                 <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Vendor</button>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor Name</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">WhatsApp</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
-                            </tr>
+                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">WhatsApp</th><th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Actions</th></tr>
                         </thead>
                         <tbody id="vendors-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Items Section -->
             <section id="items-section" class="hidden space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex space-x-4 border-b sm:border-0">
-                        <button id="tab-all-items" onclick="filterItems('all')" class="border-b-2 border-emerald-500 px-4 py-2 font-bold text-emerald-600">All Items</button>
-                        <button id="tab-common-items" onclick="filterItems('common')" class="px-4 py-2 text-gray-500 hover:text-emerald-600 font-bold">Common Items</button>
-                    </div>
-                    <div id="vendor-filter-info" class="hidden bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-between">
-                        <span id="filter-vendor-name">Filtering by Vendor</span>
-                        <button onclick="clearVendorFilter()" class="ml-4 text-blue-900 underline">Clear</button>
-                    </div>
+                <div class="flex space-x-4 border-b">
+                    <button id="tab-all-items" onclick="filterItems('all')" class="border-b-2 border-emerald-500 px-4 py-2 font-bold text-emerald-600">All Items</button>
+                    <button id="tab-common-items" onclick="filterItems('common')" class="px-4 py-2 text-gray-500 hover:text-emerald-600 font-bold">Common Items</button>
                 </div>
-                <button onclick="openModal('item')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold w-full sm:w-auto">Add New Item</button>
+                <button onclick="openModal('item')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Item</button>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Item</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Price</th><th class="px-4 py-3 text-right">Actions</th></tr>
+                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Item</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Price</th><th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Actions</th></tr>
                         </thead>
                         <tbody id="items-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Transactions Section -->
             <section id="transactions-section" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm space-y-4">
-                    <h3 class="font-bold text-gray-700">Filter by Date Range</h3>
-                    <div class="flex flex-wrap gap-4 items-end">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Start Date</label>
-                            <input type="date" id="start-date" class="border rounded-lg p-2 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">End Date</label>
-                            <input type="date" id="end-date" class="border rounded-lg p-2 text-sm">
-                        </div>
-                        <button onclick="applyDateFilter()" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold text-sm">Apply Filter</button>
-                        <button onclick="resetDateFilter()" class="border px-6 py-2 rounded-lg font-bold text-sm">Reset</button>
-                    </div>
+                <div class="flex gap-4 items-end bg-white p-4 rounded-xl shadow-sm">
+                    <input type="date" id="start-date" class="border p-2 rounded text-sm">
+                    <input type="date" id="end-date" class="border p-2 rounded text-sm">
+                    <button onclick="applyDateFilter()" class="bg-emerald-500 text-white px-4 py-2 rounded font-bold text-sm">Filter</button>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="vendor-stats"></div>
+                <div id="vendor-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Date</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Items</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Amount</th>
-                            </tr>
+                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Date</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Amount</th></tr>
                         </thead>
                         <tbody id="orders-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
@@ -140,18 +103,16 @@
     </div>
 
     <!-- Modal -->
-    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 my-8">
-            <h3 id="modal-title" class="text-xl font-bold mb-4">Add New</h3>
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h3 id="modal-title" class="text-xl font-bold mb-4">Add Item</h3>
             <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
                 <input type="hidden" id="form-type">
                 <input type="hidden" id="edit-id">
 
                 <div id="item-fields" class="space-y-4">
-                    <label class="block text-sm font-bold text-gray-700">Select Vendors (Multiple)</label>
-                    <div id="vendor-checkboxes" class="max-h-40 overflow-y-auto border rounded-lg p-2 space-y-2">
-                        <!-- Vendors checkboxes -->
-                    </div>
+                    <label class="block text-sm font-bold">Select Vendors</label>
+                    <div id="vendor-checkboxes" class="border rounded-lg p-2 space-y-1 max-h-32 overflow-y-auto"></div>
                     <input type="text" id="item-name" placeholder="Item Name" class="w-full border rounded-lg p-2" required>
                     <input type="number" step="0.01" id="item-price" placeholder="Price (₹)" class="w-full border rounded-lg p-2" required>
                     <select id="item-category" class="w-full border rounded-lg p-2">
@@ -163,14 +124,12 @@
                 </div>
 
                 <div id="vendor-fields" class="hidden space-y-4">
-                    <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border rounded-lg p-2" required>
-                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border rounded-lg p-2" required>
-                    <label class="flex items-center space-x-2 text-sm font-bold text-emerald-600 border p-2 rounded-lg">
-                        <input type="checkbox" id="vendor-special" class="rounded"> <span>Mark as Special Vendor</span>
-                    </label>
+                    <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border rounded-lg p-2">
+                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border rounded-lg p-2">
+                    <label class="flex items-center space-x-2 text-sm"><input type="checkbox" id="vendor-special"> <span>Special Vendor</span></label>
                 </div>
 
-                <div class="flex space-x-3 pt-4">
+                <div class="flex space-x-3">
                     <button type="button" onclick="closeModal()" class="flex-1 border py-2 rounded-lg">Cancel</button>
                     <button type="submit" class="flex-1 bg-emerald-500 text-white py-2 rounded-lg font-bold">Save</button>
                 </div>
@@ -179,280 +138,105 @@
     </div>
 
     <script>
-        let vendors = [];
-        let items = [];
-        let orders = [];
-        let currentItemFilter = 'all';
-        let currentVendorFilter = 'all';
-        let specificVendorFilter = null;
-
-        function handleLogin(event) {
-            event.preventDefault();
-            if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'password123') {
-                sessionStorage.setItem('isAdminAuthenticated', 'true');
-                showAdminPanel();
-            } else { alert('Wrong login!'); }
-        }
-
-        function showAdminPanel() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('admin-panel').classList.remove('hidden');
-            loadData();
-        }
-
-        if (sessionStorage.getItem('isAdminAuthenticated') === 'true') { showAdminPanel(); }
-
-        function showSection(section) {
-            ['users', 'vendors', 'items', 'transactions'].forEach(id => {
-                document.getElementById(`${id}-section`).classList.toggle('hidden', id !== section);
-                const navButton = document.getElementById(`nav-${id}`);
-                navButton.classList.toggle('active-nav', id === section);
-                navButton.classList.toggle('text-gray-500', id !== section);
-            });
-        }
-
-        function filterItems(filter) {
-            currentItemFilter = filter;
-            specificVendorFilter = null;
-            document.getElementById('vendor-filter-info').classList.add('hidden');
-            updateItemTabUI();
-            renderItems();
-        }
-
-        function updateItemTabUI() {
-            document.getElementById('tab-all-items').classList.toggle('border-b-2', currentItemFilter === 'all');
-            document.getElementById('tab-all-items').classList.toggle('border-emerald-500', currentItemFilter === 'all');
-            document.getElementById('tab-all-items').classList.toggle('text-emerald-600', currentItemFilter === 'all');
-            document.getElementById('tab-common-items').classList.toggle('border-b-2', currentItemFilter === 'common');
-            document.getElementById('tab-common-items').classList.toggle('border-emerald-500', currentItemFilter === 'common');
-            document.getElementById('tab-common-items').classList.toggle('text-emerald-600', currentItemFilter === 'common');
-        }
-
-        function manageVendorItems(vendorId, vendorName) {
-            specificVendorFilter = vendorId;
-            document.getElementById('filter-vendor-name').textContent = `Showing Items for: ${vendorName}`;
-            document.getElementById('vendor-filter-info').classList.remove('hidden');
-            showSection('items');
-            renderItems();
-        }
-
-        function clearVendorFilter() {
-            specificVendorFilter = null;
-            document.getElementById('vendor-filter-info').classList.add('hidden');
-            renderItems();
-        }
-
-        function filterVendors(filter) {
-            currentVendorFilter = filter;
-            document.getElementById('tab-all-vendors').classList.toggle('border-b-2', filter === 'all');
-            document.getElementById('tab-all-vendors').classList.toggle('border-emerald-500', filter === 'all');
-            document.getElementById('tab-all-vendors').classList.toggle('text-emerald-600', filter === 'all');
-            document.getElementById('tab-special-vendors').classList.toggle('border-b-2', filter === 'special');
-            document.getElementById('tab-special-vendors').classList.toggle('border-emerald-500', filter === 'special');
-            document.getElementById('tab-special-vendors').classList.toggle('text-emerald-600', filter === 'special');
-            renderVendors();
-        }
+        let vendors = []; let items = []; let orders = []; let currentItemFilter = 'all';
 
         async function loadData() {
             const [pRes, vRes, iRes, oRes] = await Promise.all([
                 fetch('/api/all-profiles'), fetch('/api/vendors'), fetch('/api/items'), fetch('/api/orders')
             ]);
-            const profiles = await pRes.json();
-            vendors = await vRes.json();
-            items = await iRes.json();
-            orders = await oRes.json();
+            const profiles = await pRes.json(); vendors = await vRes.json(); items = await iRes.json(); orders = await oRes.json();
 
             document.getElementById('users-list').innerHTML = profiles.map(p => `
-                <tr>
-                    <td class="px-4 py-3 text-sm font-bold">${p.shopName}<div class="text-xs font-normal text-gray-500">${p.ownerName}</div></td>
-                    <td class="px-4 py-3 text-sm">${p.phone}<div class="text-xs text-gray-500 truncate max-w-[150px]">${p.address}</div></td>
-                    <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}<br>GST: ${p.gst || '-'}<br>Turnover: ${p.turnover}</td>
-                </tr>
-            `).join('');
+                <tr><td class="px-4 py-3 font-bold">${p.shopName}<div class="text-xs font-normal">${p.ownerName}</div></td>
+                <td class="px-4 py-3 text-sm">${p.phone}<div class="text-xs text-gray-500">${p.address}</div></td>
+                <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}</td></tr>`).join('');
 
-            updateVendorCheckboxes();
-            renderVendors();
-            renderItems();
-            renderTransactions();
-        }
+            document.getElementById('vendors-list').innerHTML = vendors.map(v => `
+                <tr><td class="px-4 py-3 font-bold">${v.name} ${v.isSpecial ? '⭐' : ''}</td><td class="px-4 py-3 text-sm">${v.phone}</td>
+                <td class="px-4 py-3 text-right"><button onclick="editVendor('${v.id}')" class="text-blue-500 mr-2">Edit</button><button onclick="deleteVendor('${v.id}')" class="text-red-500">Delete</button></td></tr>`).join('');
 
-        function updateVendorCheckboxes() {
-            const checkContainer = document.getElementById('vendor-checkboxes');
-            checkContainer.innerHTML = `
-                <label class="flex items-center space-x-2 text-sm">
-                    <input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-600">Common (All Vendors)</span>
-                </label>` + vendors.map(v => `
-                <label class="flex items-center space-x-2 text-sm">
-                    <input type="checkbox" value="${v.id}" class="vendor-check"> <span>${v.name}</span>
-                </label>
-            `).join('');
-        }
+            document.getElementById('vendor-checkboxes').innerHTML = `<label class="flex items-center space-x-2 text-xs"><input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-600">ALL VENDORS</span></label>` +
+                vendors.map(v => `<label class="flex items-center space-x-2 text-xs"><input type="checkbox" value="${v.id}" class="vendor-check"> <span>${v.name}</span></label>`).join('');
 
-        function renderVendors() {
-            const filtered = currentVendorFilter === 'special' ? vendors.filter(v => v.isSpecial) : vendors;
-            document.getElementById('vendors-list').innerHTML = filtered.map(v => `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-4 py-3 text-sm font-semibold text-gray-900">${v.name}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500">${v.phone}</td>
-                    <td class="px-4 py-3 text-xs uppercase font-bold">
-                        ${v.isSpecial ? '<span class="text-emerald-600">Special</span>' : '<span class="text-gray-400">Standard</span>'}
-                    </td>
-                    <td class="px-4 py-3 text-right space-x-2">
-                        <button onclick="manageVendorItems('${v.id}', '${v.name}')" class="text-emerald-600 font-bold text-xs underline">Manage Items</button>
-                        <button onclick="editVendor('${v.id}')" class="text-blue-500 font-bold text-xs">Edit</button>
-                        <button onclick="deleteVendor('${v.id}')" class="text-red-500 font-bold text-xs">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
+            renderItems(); renderTransactions();
         }
 
         function renderItems() {
-            let filtered = items;
-            if (specificVendorFilter) {
-                filtered = items.filter(i => i.vendorId === specificVendorFilter || i.vendorId === 'common');
-            } else if (currentItemFilter === 'common') {
-                filtered = items.filter(i => i.vendorId === 'common');
-            }
-
+            const filtered = currentItemFilter === 'common' ? items.filter(i => i.vendorId === 'common') : items;
             document.getElementById('items-list').innerHTML = filtered.map(item => {
-                const vendor = vendors.find(v => v.id === item.vendorId);
-                return `<tr>
-                    <td class="px-4 py-3 text-sm font-bold">${item.name}</td>
-                    <td class="px-4 py-3 text-xs text-gray-500">${item.vendorId === 'common' ? 'ALL VENDORS' : (vendor ? vendor.name : '?')}</td>
-                    <td class="px-4 py-3 text-sm font-bold">₹${item.price}</td>
-                    <td class="px-4 py-3 text-right space-x-2">
-                        <button onclick="editItem('${item.id}')" class="text-blue-500 font-bold text-xs">Edit</button>
-                        <button onclick="deleteItem('${item.id}')" class="text-red-500 font-bold text-xs">Delete</button>
-                    </td>
-                </tr>`;
+                const v = vendors.find(v => v.id === item.vendorId);
+                return `<tr><td class="px-4 py-3 font-bold">${item.name}</td><td class="px-4 py-3 text-xs">${item.vendorId === 'common' ? 'COMMON' : (v ? v.name : '?')}</td>
+                <td class="px-4 py-3 font-bold">₹${item.price}</td><td class="px-4 py-3 text-right"><button onclick="editItem('${item.id}')" class="text-blue-500 mr-2">Edit</button><button onclick="deleteItem('${item.id}')" class="text-red-500">Delete</button></td></tr>`;
             }).join('');
         }
 
         function renderTransactions() {
-            const start = document.getElementById('start-date').value;
-            const end = document.getElementById('end-date').value;
-            let filteredOrders = orders;
-            if (start) filteredOrders = filteredOrders.filter(o => new Date(o.createdAt) >= new Date(start));
-            if (end) filteredOrders = filteredOrders.filter(o => new Date(o.createdAt) <= new Date(end + 'T23:59:59'));
-
-            const stats = vendors.map(v => {
-                const vOrders = filteredOrders.filter(o => o.vendorId === v.id);
-                const total = vOrders.reduce((sum, o) => sum + parseFloat(o.totalAmount), 0);
-                return { name: v.name, count: vOrders.length, total };
-            });
-
-            document.getElementById('vendor-stats').innerHTML = stats.map(s => `
-                <div class="bg-white p-4 rounded-xl shadow-sm">
-                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">${s.name}</h4>
-                    <div class="text-xl font-bold text-gray-900">₹${s.total.toFixed(2)}</div>
-                    <div class="text-[10px] text-gray-500 font-medium">${s.count} orders</div>
-                </div>
-            `).join('');
-
-            document.getElementById('orders-list').innerHTML = filteredOrders.slice().reverse().map(o => {
-                const vendor = vendors.find(v => v.id === o.vendorId);
-                return `<tr>
-                    <td class="px-4 py-3 text-[10px] text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</td>
-                    <td class="px-4 py-3 text-sm font-bold">${vendor ? vendor.name : '?'}</td>
-                    <td class="px-4 py-3 text-sm">${o.itemsCount} items</td>
-                    <td class="px-4 py-3 text-sm font-bold">₹${o.totalAmount}</td>
-                </tr>`;
+            document.getElementById('orders-list').innerHTML = orders.slice().reverse().map(o => {
+                const v = vendors.find(v => v.id === o.vendorId);
+                return `<tr><td class="px-4 py-3 text-xs">${new Date(o.createdAt).toLocaleDateString()}</td><td class="px-4 py-3 text-sm font-bold">${v ? v.name : '?'}</td><td class="px-4 py-3 font-bold">₹${o.totalAmount}</td></tr>`;
             }).join('');
         }
 
         function openModal(type, id = null) {
             document.getElementById('modal').style.display = 'flex';
-            document.getElementById('form-type').value = type;
-            document.getElementById('edit-id').value = id || '';
-            document.getElementById('modal-title').textContent = (id ? 'Edit ' : 'Add ') + (type === 'item' ? 'Item' : 'Vendor');
-
+            document.getElementById('form-type').value = type; document.getElementById('edit-id').value = id || '';
             document.getElementById('item-fields').classList.toggle('hidden', type !== 'item');
             document.getElementById('vendor-fields').classList.toggle('hidden', type !== 'vendor');
-
-            if (id) {
-                if (type === 'item') {
-                    const item = items.find(i => i.id === id);
-                    document.getElementById('item-name').value = item.name;
-                    document.getElementById('item-price').value = item.price;
-                    document.getElementById('item-category').value = item.category;
-                    document.getElementById('item-unit').value = item.unit;
-                    document.querySelectorAll('.vendor-check').forEach(chk => {
-                        chk.checked = (chk.value === item.vendorId);
-                    });
+            if(id) {
+                if(type==='item') {
+                    const i = items.find(i=>i.id===id);
+                    document.getElementById('item-name').value = i.name; document.getElementById('item-price').value = i.price;
+                    document.getElementById('item-category').value = i.category; document.getElementById('item-unit').value = i.unit;
+                    document.querySelectorAll('.vendor-check').forEach(c => c.checked = (c.value === i.vendorId));
                 } else {
-                    const vendor = vendors.find(v => v.id === id);
-                    document.getElementById('vendor-name').value = vendor.name;
-                    document.getElementById('vendor-phone').value = vendor.phone;
-                    document.getElementById('vendor-special').checked = vendor.isSpecial;
+                    const v = vendors.find(v=>v.id===id);
+                    document.getElementById('vendor-name').value = v.name; document.getElementById('vendor-phone').value = v.phone;
+                    document.getElementById('vendor-special').checked = v.isSpecial;
                 }
             }
         }
-
-        function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('modal-form').reset(); }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
             const type = document.getElementById('form-type').value;
             const editId = document.getElementById('edit-id').value;
-
-            const endpoint = editId ?
-                (type === 'item' ? `/api/items/${editId}` : `/api/vendors/${editId}`) :
-                (type === 'item' ? '/api/items' : '/api/vendors');
-
             const method = editId ? 'PATCH' : 'POST';
+            const endpoint = (type === 'item' ? '/api/items' : '/api/vendors') + (editId ? `/${editId}` : '');
 
-            let data = {};
-            if (type === 'item') {
+            let body = {};
+            if(type === 'item') {
                 const checks = document.querySelectorAll('.vendor-check:checked');
                 const vendorIds = Array.from(checks).map(c => c.value);
-
-                const itemData = {
+                const data = {
                     name: document.getElementById('item-name').value,
                     price: document.getElementById('item-price').value,
                     category: document.getElementById('item-category').value,
-                    unit: document.getElementById('item-unit').value,
+                    unit: document.getElementById('item-unit').value
                 };
-
-                if (editId) {
-                    data = { ...itemData, vendorId: vendorIds[0] || 'common' };
-                } else {
-                    data = { ...itemData, vendorIds };
-                }
+                if(editId) { body = { ...data, vendorId: vendorIds[0] || 'common' }; }
+                else { body = { ...data, vendorIds }; }
             } else {
-                data = {
+                body = {
                     name: document.getElementById('vendor-name').value,
                     phone: document.getElementById('vendor-phone').value.replace(/\D/g, ''),
                     isSpecial: document.getElementById('vendor-special').checked
                 };
             }
 
-            try {
-                const res = await fetch(endpoint, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (res.ok) {
-                    closeModal();
-                    loadData();
-                } else {
-                    alert("Failed to save. Please try again.");
-                }
-            } catch (err) {
-                alert("Error connecting to server.");
-            }
+            const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if(res.ok) { closeModal(); loadData(); } else { alert('Error saving'); }
         }
 
+        function handleLogin(e) { e.preventDefault(); if(document.getElementById('username').value==='admin' && document.getElementById('password').value==='password123') { sessionStorage.setItem('isAdminAuthenticated','true'); showAdminPanel(); } else { alert('Bad login'); } }
+        function showAdminPanel() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('admin-panel').classList.remove('hidden'); loadData(); }
+        if (sessionStorage.getItem('isAdminAuthenticated') === 'true') showAdminPanel();
+        function showSection(s) { ['users', 'vendors', 'items', 'transactions'].forEach(id => { document.getElementById(`${id}-section`).classList.toggle('hidden', id !== s); document.getElementById(`nav-${id}`).classList.toggle('active-nav', id === s); }); }
+        function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('modal-form').reset(); }
+        function filterItems(f) { currentItemFilter = f; renderItems(); }
         function editVendor(id) { openModal('vendor', id); }
         function editItem(id) { openModal('item', id); }
         async function deleteVendor(id) { if(confirm('Delete?')) { await fetch(`/api/vendors/${id}`, { method: 'DELETE' }); loadData(); } }
         async function deleteItem(id) { if(confirm('Delete?')) { await fetch(`/api/items/${id}`, { method: 'DELETE' }); loadData(); } }
-
-        function applyDateFilter() { renderTransactions(); }
-        function resetDateFilter() { document.getElementById('start-date').value = ''; document.getElementById('end-date').value = ''; renderTransactions(); }
-
-        loadData();
     </script>
 </body>
 </html>
