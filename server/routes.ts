@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertGroceryItemSchema, insertVendorSchema, insertProfileSchema, insertOrderSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check endpoint
+  // Health check
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok" });
   });
@@ -36,7 +36,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/items", async (req, res) => {
     const { vendorIds, ...itemData } = req.body;
-
     if (Array.isArray(vendorIds)) {
       const createdItems = [];
       for (const vId of vendorIds) {
@@ -45,7 +44,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       return res.status(201).json(createdItems);
     }
-
     const parsed = insertGroceryItemSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error });
     const item = await storage.createGroceryItem(parsed.data);
@@ -75,12 +73,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(201).json(vendor);
   });
 
+  app.patch("/api/vendors/:id", async (req, res) => {
+    const vendor = await storage.updateVendor(req.params.id, req.body);
+    res.json(vendor);
+  });
+
   app.delete("/api/vendors/:id", async (req, res) => {
     await storage.deleteVendor(req.params.id);
     res.status(204).end();
   });
 
-  // Orders / Transactions
+  // Orders
   app.get("/api/orders", async (_req, res) => {
     const orders = await storage.getOrders();
     res.json(orders);
