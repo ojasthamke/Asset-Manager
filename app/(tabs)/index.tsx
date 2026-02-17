@@ -14,19 +14,23 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeIn, Layout, SlideInUp, SlideOutUp } from "react-native-reanimated";
+import { BlurView } from "expo-blur";
 import { useOrder } from "@/lib/OrderContext";
 import { useTheme } from "@/lib/useTheme";
 import { Vendor } from "@/lib/store";
 import { getApiUrl } from "@/lib/query-client";
 
-function VendorCard({ vendor, theme }: { vendor: Vendor; theme: any }) {
+function VendorCard({ vendor, theme }: { vendor: Vendor & { isSpecial?: boolean }; theme: any }) {
+  const isSpecial = vendor.isSpecial;
+
   return (
     <Pressable
       style={({ pressed }) => [
         styles.vendorCard,
         {
           backgroundColor: theme.card,
-          borderColor: theme.border,
+          borderColor: isSpecial ? theme.tint : theme.border,
+          borderWidth: isSpecial ? 2 : 1.5,
           opacity: pressed ? 0.8 : 1,
           transform: [{ scale: pressed ? 0.98 : 1 }],
         },
@@ -43,9 +47,24 @@ function VendorCard({ vendor, theme }: { vendor: Vendor; theme: any }) {
         <Ionicons name="storefront" size={24} color={theme.tint} />
       </View>
       <View style={styles.vendorInfo}>
-        <Text style={[styles.vendorName, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]}>
-          {vendor.name}
-        </Text>
+        <View style={styles.vendorTitleRow}>
+          {isSpecial ? (
+            <BlurView intensity={80} tint="light" style={styles.glassNameContainer}>
+              <Text style={[styles.vendorName, { color: theme.tint, fontFamily: "Poppins_700Bold" }]}>
+                {vendor.name}
+              </Text>
+            </BlurView>
+          ) : (
+            <Text style={[styles.vendorName, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]}>
+              {vendor.name}
+            </Text>
+          )}
+          {isSpecial && (
+            <View style={[styles.specialTag, { backgroundColor: theme.tint }]}>
+              <Text style={styles.specialTagText}>SPECIAL</Text>
+            </View>
+          )}
+        </View>
         <Text style={[styles.vendorPhone, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
           +{vendor.phone}
         </Text>
@@ -60,34 +79,29 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { vendors, isLoading } = useOrder();
   const [refreshing, setRefreshing] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
 
   useEffect(() => {
     const checkConnection = async () => {
+      if (vendors.length > 0) {
+        setIsWakingUp(false);
+        return;
+      }
       try {
         const baseUrl = getApiUrl();
-        // Use the new health check endpoint which is faster and lighter
         const response = await fetch(`${baseUrl}/api/health`, {
           method: 'GET',
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(10000)
         });
-
-        if (response.ok) {
-          setIsOffline(false);
-        } else {
-          // If server returns error but responds, it's technically online
-          setIsOffline(false);
-        }
+        if (response.ok) setIsWakingUp(false);
       } catch (error) {
-        // Only show offline if the request actually fails (timeout or no network)
-        setIsOffline(true);
+        setIsWakingUp(true);
       }
     };
-
     checkConnection();
-    const interval = setInterval(checkConnection, 15000); // Check every 15s to be less intrusive
+    const interval = setInterval(checkConnection, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [vendors]);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -98,22 +112,23 @@ export default function HomeScreen() {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
         <ActivityIndicator size="large" color={theme.tint} />
+        <Text style={{ marginTop: 12, color: theme.textSecondary, fontFamily: 'Poppins_400Regular' }}>Loading your store...</Text>
       </View>
     );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {isOffline && (
-        <Animated.View entering={SlideInUp} exiting={SlideOutUp} style={[styles.offlineBanner, { backgroundColor: theme.danger + '15', borderBottomColor: theme.danger + '30' }]}>
-          <Ionicons name="wifi-outline" size={16} color={theme.danger} />
-          <Text style={[styles.offlineText, { color: theme.danger, fontFamily: 'Poppins_700Bold' }]}>
-            Connecting to server...
+      {isWakingUp && vendors.length === 0 && (
+        <Animated.View entering={SlideInUp} exiting={SlideOutUp} style={[styles.offlineBanner, { backgroundColor: theme.tint + '10', borderBottomColor: theme.tint + '20' }]}>
+          <ActivityIndicator size="small" color={theme.tint} style={{ marginRight: 8 }} />
+          <Text style={[styles.offlineText, { color: theme.tint, fontFamily: 'Poppins_600SemiBold' }]}>
+            Connecting to secure cloud...
           </Text>
         </Animated.View>
       )}
 
-      <View style={[styles.header, { paddingTop: insets.top + (isOffline ? 50 : 10) }]}>
+      <View style={[styles.header, { paddingTop: insets.top + (isWakingUp && vendors.length === 0 ? 50 : 10) }]}>
         <Text style={[styles.headerTitle, { color: theme.text, fontFamily: "Poppins_800ExtraBold" }]}>
           QuickOrder
         </Text>
@@ -135,13 +150,13 @@ export default function HomeScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <View style={[styles.emptyIconContainer, { backgroundColor: theme.inputBg }]}>
-              <Ionicons name="people-outline" size={48} color={theme.textSecondary} />
+              <Ionicons name={isWakingUp ? "cloud-download-outline" : "people-outline"} size={48} color={theme.textSecondary} />
             </View>
             <Text style={[styles.emptyText, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>
-              {isOffline ? "Server is waking up" : "No Vendors Found"}
+              {isWakingUp ? "Preparing your data" : "No Vendors Found"}
             </Text>
             <Text style={[styles.emptySubtext, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-              {isOffline ? "Please wait a moment while we connect to the live database." : "Add vendors using the Admin Panel to see them here."}
+              {isWakingUp ? "The cloud server is starting up. This usually takes 30 seconds." : "Add vendors using the Admin Panel to see them here."}
             </Text>
           </View>
         }
@@ -163,7 +178,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
     borderBottomWidth: 1,
     zIndex: 100,
   },
@@ -194,7 +208,11 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   vendorInfo: { flex: 1 },
-  vendorName: { fontSize: 17, marginBottom: 2 },
+  vendorTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 },
+  vendorName: { fontSize: 17 },
+  glassNameContainer: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, overflow: 'hidden' },
+  specialTag: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  specialTagText: { color: '#fff', fontSize: 10, fontFamily: 'Poppins_700Bold' },
   vendorPhone: { fontSize: 13 },
   emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 100, paddingHorizontal: 40 },
   emptyIconContainer: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },

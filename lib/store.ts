@@ -30,7 +30,6 @@ export interface GroceryItem {
   unit: UnitType;
   category: Category;
   price: string; // Price in Rupees
-  imageKey?: string;
   selected: boolean;
   quantity: number;
 }
@@ -39,6 +38,7 @@ export interface Vendor {
   id: string;
   name: string;
   phone: string;
+  isSpecial?: boolean;
 }
 
 export interface Profile {
@@ -60,29 +60,6 @@ export interface OrderHistoryEntry {
   vendorPhone: string;
   items: { name: string; quantity: number; unit: string }[];
   message: string;
-}
-
-const ITEM_IMAGES: Record<string, ImageSourcePropType> = {
-  onion: require("../assets/images/items/onion.jpg"),
-  tomato: require("../assets/images/items/tomato.jpg"),
-  potato: require("../assets/images/items/potato.jpg"),
-  paneer: require("../assets/images/items/paneer.jpg"),
-  cheese: require("../assets/images/items/cheese.jpg"),
-  "cooking-oil": require("../assets/images/items/cooking-oil.jpg"),
-  chicken: require("../assets/images/items/chicken.jpg"),
-  butter: require("../assets/images/items/butter.jpg"),
-  rice: require("../assets/images/items/rice.jpg"),
-  flour: require("../assets/images/items/flour.jpg"),
-  "green-chilli": require("../assets/images/items/green-chilli.jpg"),
-  coriander: require("../assets/images/items/coriander.jpg"),
-  ginger: require("../assets/images/items/ginger.jpg"),
-  garlic: require("../assets/images/items/garlic.jpg"),
-  eggs: require("../assets/images/items/eggs.jpg"),
-};
-
-export function getItemImage(imageKey?: string): ImageSourcePropType | null {
-  if (!imageKey) return null;
-  return ITEM_IMAGES[imageKey] || null;
 }
 
 const VENDORS_KEY = "@quickorder_vendors_v3";
@@ -137,6 +114,10 @@ export async function loadItems(vendorId: string): Promise<GroceryItem[]> {
   }
 }
 
+export async function saveItems(items: GroceryItem[]): Promise<void> {
+  // Not used anymore as we fetch from server or cache
+}
+
 export async function loadVendors(): Promise<Vendor[]> {
   try {
     const baseUrl = getBaseUrl();
@@ -154,6 +135,10 @@ export async function loadVendors(): Promise<Vendor[]> {
     const data = await AsyncStorage.getItem(VENDORS_KEY);
     return data ? JSON.parse(data) : [];
   }
+}
+
+export async function saveVendors(vendors: Vendor[]): Promise<void> {
+  await AsyncStorage.setItem(VENDORS_KEY, JSON.stringify(vendors));
 }
 
 export async function loadRestaurantName(): Promise<string> {

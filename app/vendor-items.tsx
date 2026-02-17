@@ -8,12 +8,11 @@ import {
   ActivityIndicator,
   Modal,
   ScrollView,
-  Image,
   Alert,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons, Feather } from "@expo/vector-icons";
+import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useOrder } from "@/lib/OrderContext";
@@ -24,7 +23,6 @@ import {
   CATEGORIES,
   UnitType,
   UNIT_OPTIONS,
-  getItemImage,
   GroceryItem,
 } from "@/lib/store";
 
@@ -38,6 +36,9 @@ const CATEGORY_ICONS: Record<Category, { name: string; family: string }> = {
 
 function CategoryIcon({ category, color, size }: { category: Category; color: string; size: number }) {
   const icon = CATEGORY_ICONS[category];
+  if (icon.family === "material-community") {
+    return <MaterialCommunityIcons name={icon.name as any} size={size} color={color} />;
+  }
   return <Ionicons name={icon.name as any} size={size} color={color} />;
 }
 
@@ -55,7 +56,6 @@ function ItemCard({
   onUnitChange: (id: string, unit: UnitType) => void;
 }) {
   const [showUnitPicker, setShowUnitPicker] = useState(false);
-  const imageSource = getItemImage(item.imageKey);
 
   return (
     <Pressable
@@ -73,22 +73,17 @@ function ItemCard({
       }}
     >
       <View style={styles.cardTop}>
-        <View style={[styles.imageContainer, { backgroundColor: theme.inputBg }]}>
-          {imageSource ? (
-            <Image source={imageSource} style={styles.itemImage} resizeMode="cover" />
-          ) : (
-            <CategoryIcon category={item.category} color={theme.textSecondary} size={32} />
-          )}
+        <View style={[styles.iconContainer, { backgroundColor: theme.inputBg }]}>
+          <CategoryIcon category={item.category} color={item.selected ? theme.tint : theme.textSecondary} size={28} />
           {item.selected && (
             <View style={[styles.checkBadge, { backgroundColor: theme.tint }]}>
-              <Ionicons name="checkmark" size={14} color="#fff" />
+              <Ionicons name="checkmark" size={12} color="#fff" />
             </View>
           )}
         </View>
         <Text style={[styles.itemName, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]} numberOfLines={1}>
           {item.name}
         </Text>
-        {/* Price Tag added here */}
         <Text style={[styles.itemPrice, { color: theme.tint, fontFamily: "Poppins_700Bold" }]}>
           ₹{parseFloat(item.price || "0").toFixed(2)}
         </Text>
@@ -247,9 +242,8 @@ const styles = StyleSheet.create({
   gridRow: { justifyContent: "space-between", marginBottom: 16 },
   itemCard: { width: "48%", borderRadius: 20, borderWidth: 1.5, overflow: "hidden", paddingBottom: 12 },
   cardTop: { alignItems: "center", paddingTop: 12, paddingHorizontal: 12 },
-  imageContainer: { width: "100%", height: 90, borderRadius: 14, overflow: "hidden", alignItems: "center", justifyContent: "center", marginBottom: 10 },
-  itemImage: { width: "100%", height: "100%" },
-  checkBadge: { position: "absolute", top: 6, right: 6, width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" },
+  iconContainer: { width: 56, height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginBottom: 10 },
+  checkBadge: { position: "absolute", top: -4, right: -4, width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" },
   itemName: { fontSize: 13, textAlign: "center" },
   itemPrice: { fontSize: 14, textAlign: "center", marginTop: 2 },
   cardControls: { paddingHorizontal: 10, paddingTop: 8, gap: 6 },

@@ -132,7 +132,7 @@ export class MemStorage implements IStorage {
   }
   async deleteGroceryItem(id: string) { this.groceryItems.delete(id); }
   async getVendors() { return Array.from(this.vendors.values()); }
-  async createVendor(v: InsertVendor) { const id = (this.currentId++).toString(); const vendor = { ...v, id }; this.vendors.set(id, vendor); return vendor; }
+  async createVendor(v: InsertVendor) { const id = (this.currentId++).toString(); const vendor = { ...v, id, isSpecial: v.isSpecial ?? false }; this.vendors.set(id, vendor); return vendor; }
   async updateVendor(id: string, u: Partial<InsertVendor>) { const vendor = this.vendors.get(id); const updated = { ...vendor!, ...u }; this.vendors.set(id, updated); return updated; }
   async deleteVendor(id: string) { this.vendors.delete(id); }
   async getOrders() { return Array.from(this.orders.values()); }

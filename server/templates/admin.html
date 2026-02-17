@@ -65,7 +65,12 @@
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor Name</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">WhatsApp</th><th class="px-4 py-3 text-right">Actions</th></tr>
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor Name</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">WhatsApp</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
                         </thead>
                         <tbody id="vendors-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
@@ -74,11 +79,17 @@
 
             <!-- Items Section -->
             <section id="items-section" class="hidden space-y-6">
-                <div class="flex space-x-4 border-b">
-                    <button id="tab-all-items" onclick="filterItems('all')" class="border-b-2 border-emerald-500 px-4 py-2 font-bold text-emerald-600">All Items</button>
-                    <button id="tab-common-items" onclick="filterItems('common')" class="px-4 py-2 text-gray-500 hover:text-emerald-600 font-bold">Common Items</button>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex space-x-4 border-b sm:border-0">
+                        <button id="tab-all-items" onclick="filterItems('all')" class="border-b-2 border-emerald-500 px-4 py-2 font-bold text-emerald-600">All Items</button>
+                        <button id="tab-common-items" onclick="filterItems('common')" class="px-4 py-2 text-gray-500 hover:text-emerald-600 font-bold">Common Items</button>
+                    </div>
+                    <div id="vendor-filter-info" class="hidden bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-between">
+                        <span id="filter-vendor-name">Filtering by Vendor</span>
+                        <button onclick="clearVendorFilter()" class="ml-4 text-blue-900 underline">Clear</button>
+                    </div>
                 </div>
-                <button onclick="openModal('item')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Item</button>
+                <button onclick="openModal('item')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold w-full sm:w-auto">Add New Item</button>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -91,6 +102,21 @@
 
             <!-- Transactions Section -->
             <section id="transactions-section" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm space-y-4">
+                    <h3 class="font-bold text-gray-700">Filter by Date Range</h3>
+                    <div class="flex flex-wrap gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Start Date</label>
+                            <input type="date" id="start-date" class="border rounded-lg p-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">End Date</label>
+                            <input type="date" id="end-date" class="border rounded-lg p-2 text-sm">
+                        </div>
+                        <button onclick="applyDateFilter()" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold text-sm">Apply Filter</button>
+                        <button onclick="resetDateFilter()" class="border px-6 py-2 rounded-lg font-bold text-sm">Reset</button>
+                    </div>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="vendor-stats"></div>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -109,7 +135,7 @@
         </main>
     </div>
 
-    <!-- Modal for adding/editing (Common) -->
+    <!-- Modal -->
     <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 my-8">
             <h3 id="modal-title" class="text-xl font-bold mb-4">Add New</h3>
@@ -120,12 +146,10 @@
                 <div id="item-fields" class="space-y-4">
                     <label class="block text-sm font-bold text-gray-700">Select Vendors (Multiple)</label>
                     <div id="vendor-checkboxes" class="max-h-40 overflow-y-auto border rounded-lg p-2 space-y-2">
-                        <label class="flex items-center space-x-2 text-sm">
-                            <input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-600">Common (All Vendors)</span>
-                        </label>
+                        <!-- Vendors checkboxes -->
                     </div>
-                    <input type="text" id="item-name" placeholder="Item Name" class="w-full border rounded-lg p-2">
-                    <input type="number" step="0.01" id="item-price" placeholder="Price (₹)" class="w-full border rounded-lg p-2">
+                    <input type="text" id="item-name" placeholder="Item Name" class="w-full border rounded-lg p-2" required>
+                    <input type="number" step="0.01" id="item-price" placeholder="Price (₹)" class="w-full border rounded-lg p-2" required>
                     <select id="item-category" class="w-full border rounded-lg p-2">
                         <option>Vegetables</option><option>Dairy</option><option>Meat & Eggs</option><option>Staples</option><option>Spices & Herbs</option>
                     </select>
@@ -135,8 +159,11 @@
                 </div>
 
                 <div id="vendor-fields" class="hidden space-y-4">
-                    <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border rounded-lg p-2">
-                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border rounded-lg p-2">
+                    <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border rounded-lg p-2" required>
+                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border rounded-lg p-2" required>
+                    <label class="flex items-center space-x-2 text-sm font-bold text-emerald-600 border p-2 rounded-lg">
+                        <input type="checkbox" id="vendor-special" class="rounded"> <span>Mark as Special Vendor</span>
+                    </label>
                 </div>
 
                 <div class="flex space-x-3 pt-4">
@@ -150,7 +177,10 @@
     <script>
         let vendors = [];
         let items = [];
+        let orders = [];
         let currentItemFilter = 'all';
+        let currentVendorFilter = 'all';
+        let specificVendorFilter = null;
 
         function handleLogin(event) {
             event.preventDefault();
@@ -179,87 +209,146 @@
 
         function filterItems(filter) {
             currentItemFilter = filter;
-            document.getElementById('tab-all-items').classList.toggle('border-b-2', filter === 'all');
-            document.getElementById('tab-all-items').classList.toggle('border-emerald-500', filter === 'all');
-            document.getElementById('tab-all-items').classList.toggle('text-emerald-600', filter === 'all');
-            document.getElementById('tab-common-items').classList.toggle('border-b-2', filter === 'common');
-            document.getElementById('tab-common-items').classList.toggle('border-emerald-500', filter === 'common');
-            document.getElementById('tab-common-items').classList.toggle('text-emerald-600', filter === 'common');
+            specificVendorFilter = null;
+            document.getElementById('vendor-filter-info').classList.add('hidden');
+            updateItemTabUI();
             renderItems();
+        }
+
+        function updateItemTabUI() {
+            document.getElementById('tab-all-items').classList.toggle('border-b-2', currentItemFilter === 'all');
+            document.getElementById('tab-all-items').classList.toggle('border-emerald-500', currentItemFilter === 'all');
+            document.getElementById('tab-all-items').classList.toggle('text-emerald-600', currentItemFilter === 'all');
+            document.getElementById('tab-common-items').classList.toggle('border-b-2', currentItemFilter === 'common');
+            document.getElementById('tab-common-items').classList.toggle('border-emerald-500', currentItemFilter === 'common');
+            document.getElementById('tab-common-items').classList.toggle('text-emerald-600', currentItemFilter === 'common');
+        }
+
+        function manageVendorItems(vendorId, vendorName) {
+            specificVendorFilter = vendorId;
+            document.getElementById('filter-vendor-name').textContent = `Showing Items for: ${vendorName}`;
+            document.getElementById('vendor-filter-info').classList.remove('hidden');
+            showSection('items');
+            renderItems();
+        }
+
+        function clearVendorFilter() {
+            specificVendorFilter = null;
+            document.getElementById('vendor-filter-info').classList.add('hidden');
+            renderItems();
+        }
+
+        function filterVendors(filter) {
+            currentVendorFilter = filter;
+            document.getElementById('tab-all-vendors').classList.toggle('border-b-2', filter === 'all');
+            document.getElementById('tab-all-vendors').classList.toggle('border-emerald-500', filter === 'all');
+            document.getElementById('tab-all-vendors').classList.toggle('text-emerald-600', filter === 'all');
+            document.getElementById('tab-special-vendors').classList.toggle('border-b-2', filter === 'special');
+            document.getElementById('tab-special-vendors').classList.toggle('border-emerald-500', filter === 'special');
+            document.getElementById('tab-special-vendors').classList.toggle('text-emerald-600', filter === 'special');
+            renderVendors();
         }
 
         async function loadData() {
             const [pRes, vRes, iRes, oRes] = await Promise.all([
                 fetch('/api/all-profiles'), fetch('/api/vendors'), fetch('/api/items'), fetch('/api/orders')
             ]);
-
             const profiles = await pRes.json();
             vendors = await vRes.json();
             items = await iRes.json();
-            const orders = await oRes.json();
+            orders = await oRes.json();
 
             document.getElementById('users-list').innerHTML = profiles.map(p => `
                 <tr>
-                    <td class="px-4 py-3"><div class="font-bold">${p.shopName}</div><div class="text-xs text-gray-500">${p.ownerName}</div></td>
-                    <td class="px-4 py-3 text-sm"><div>${p.phone}</div><div class="text-xs text-gray-500 truncate max-w-[150px]">${p.address}</div></td>
-                    <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}<br>GST: ${p.gst || '-'}<br>Turnover: ${p.turnover}</td>
+                    <td class="px-4 py-3 text-sm font-bold">${p.shopName}<div class="text-xs font-normal text-gray-500">${p.ownerName}</div></td>
+                    <td class="px-4 py-3 text-sm">${p.phone}<div class="text-xs text-gray-500 truncate max-w-[150px]">${p.address}</div></td>
+                    <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}<br>GST: ${p.gst || '-'}</td>
                 </tr>
             `).join('');
 
-            document.getElementById('vendors-list').innerHTML = vendors.map(v => `
-                <tr><td class="px-4 py-3 text-sm font-bold">${v.name}</td><td class="px-4 py-3 text-sm">${v.phone}</td>
-                <td class="px-4 py-3 text-right"><button onclick="deleteVendor('${v.id}')" class="text-red-500 font-bold">Delete</button></td></tr>
-            `).join('');
+            updateVendorCheckboxes();
+            renderVendors();
+            renderItems();
+            renderTransactions();
+        }
 
+        function updateVendorCheckboxes() {
             const checkContainer = document.getElementById('vendor-checkboxes');
-            const commonCheck = checkContainer.firstElementChild.outerHTML;
-            checkContainer.innerHTML = commonCheck + vendors.map(v => `
+            checkContainer.innerHTML = `
+                <label class="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-600">Common (All Vendors)</span>
+                </label>` + vendors.map(v => `
                 <label class="flex items-center space-x-2 text-sm">
                     <input type="checkbox" value="${v.id}" class="vendor-check"> <span>${v.name}</span>
                 </label>
             `).join('');
+        }
 
-            renderItems();
-            renderTransactions(orders);
+        function renderVendors() {
+            const filtered = currentVendorFilter === 'special' ? vendors.filter(v => v.isSpecial) : vendors;
+            document.getElementById('vendors-list').innerHTML = filtered.map(v => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3 text-sm font-semibold text-gray-900">${v.name}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500">${v.phone}</td>
+                    <td class="px-4 py-3 text-xs uppercase font-bold">
+                        ${v.isSpecial ? '<span class="text-emerald-600">Special</span>' : '<span class="text-gray-400">Standard</span>'}
+                    </td>
+                    <td class="px-4 py-3 text-right space-x-2">
+                        <button onclick="manageVendorItems('${v.id}', '${v.name}')" class="text-emerald-600 font-bold text-xs underline">Manage Items</button>
+                        <button onclick="editVendor('${v.id}')" class="text-blue-500 font-bold text-xs">Edit</button>
+                        <button onclick="deleteVendor('${v.id}')" class="text-red-500 font-bold text-xs">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         function renderItems() {
-            const filtered = currentItemFilter === 'common' ? items.filter(i => i.vendorId === 'common') : items;
+            let filtered = items;
+            if (specificVendorFilter) {
+                filtered = items.filter(i => i.vendorId === specificVendorFilter || i.vendorId === 'common');
+            } else if (currentItemFilter === 'common') {
+                filtered = items.filter(i => i.vendorId === 'common');
+            }
+
             document.getElementById('items-list').innerHTML = filtered.map(item => {
                 const vendor = vendors.find(v => v.id === item.vendorId);
                 return `<tr>
                     <td class="px-4 py-3 text-sm font-bold">${item.name}</td>
                     <td class="px-4 py-3 text-xs text-gray-500">${item.vendorId === 'common' ? 'ALL VENDORS' : (vendor ? vendor.name : '?')}</td>
                     <td class="px-4 py-3 text-sm font-bold">₹${item.price}</td>
-                    <td class="px-4 py-3 text-right"><button onclick="deleteItem('${item.id}')" class="text-red-500 font-bold">Delete</button></td>
+                    <td class="px-4 py-3 text-right space-x-2">
+                        <button onclick="editItem('${item.id}')" class="text-blue-500 font-bold text-xs">Edit</button>
+                        <button onclick="deleteItem('${item.id}')" class="text-red-500 font-bold text-xs">Delete</button>
+                    </td>
                 </tr>`;
             }).join('');
         }
 
-        function renderTransactions(orders) {
+        function renderTransactions() {
+            const start = document.getElementById('start-date').value;
+            const end = document.getElementById('end-date').value;
+            let filteredOrders = orders;
+            if (start) filteredOrders = filteredOrders.filter(o => new Date(o.createdAt) >= new Date(start));
+            if (end) filteredOrders = filteredOrders.filter(o => new Date(o.createdAt) <= new Date(end + 'T23:59:59'));
+
             const stats = vendors.map(v => {
-                const vOrders = orders.filter(o => o.vendorId === v.id);
+                const vOrders = filteredOrders.filter(o => o.vendorId === v.id);
                 const total = vOrders.reduce((sum, o) => sum + parseFloat(o.totalAmount), 0);
                 return { name: v.name, count: vOrders.length, total };
             });
 
             document.getElementById('vendor-stats').innerHTML = stats.map(s => `
-                <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${s.name}</h4>
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <div class="text-2xl font-bold text-gray-900">₹${s.total.toFixed(2)}</div>
-                            <div class="text-xs text-gray-500 font-medium">${s.count} orders received</div>
-                        </div>
-                        <div class="bg-emerald-50 text-emerald-600 p-2 rounded-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
-                    </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">${s.name}</h4>
+                    <div class="text-xl font-bold text-gray-900">₹${s.total.toFixed(2)}</div>
+                    <div class="text-[10px] text-gray-500 font-medium">${s.count} orders</div>
                 </div>
             `).join('');
 
-            document.getElementById('orders-list').innerHTML = orders.slice().reverse().map(o => {
+            document.getElementById('orders-list').innerHTML = filteredOrders.slice().reverse().map(o => {
                 const vendor = vendors.find(v => v.id === o.vendorId);
                 return `<tr>
-                    <td class="px-4 py-3 text-xs text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</td>
+                    <td class="px-4 py-3 text-[10px] text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</td>
                     <td class="px-4 py-3 text-sm font-bold">${vendor ? vendor.name : '?'}</td>
                     <td class="px-4 py-3 text-sm">${o.itemsCount} items</td>
                     <td class="px-4 py-3 text-sm font-bold">₹${o.totalAmount}</td>
@@ -267,11 +356,32 @@
             }).join('');
         }
 
-        function openModal(type) {
+        function openModal(type, id = null) {
             document.getElementById('modal').style.display = 'flex';
             document.getElementById('form-type').value = type;
+            document.getElementById('edit-id').value = id || '';
+            document.getElementById('modal-title').textContent = (id ? 'Edit ' : 'Add ') + (type === 'item' ? 'Item' : 'Vendor');
+
             document.getElementById('item-fields').classList.toggle('hidden', type !== 'item');
             document.getElementById('vendor-fields').classList.toggle('hidden', type !== 'vendor');
+
+            if (id) {
+                if (type === 'item') {
+                    const item = items.find(i => i.id === id);
+                    document.getElementById('item-name').value = item.name;
+                    document.getElementById('item-price').value = item.price;
+                    document.getElementById('item-category').value = item.category;
+                    document.getElementById('item-unit').value = item.unit;
+                    document.querySelectorAll('.vendor-check').forEach(chk => {
+                        chk.checked = (chk.value === item.vendorId);
+                    });
+                } else {
+                    const vendor = vendors.find(v => v.id === id);
+                    document.getElementById('vendor-name').value = vendor.name;
+                    document.getElementById('vendor-phone').value = vendor.phone;
+                    document.getElementById('vendor-special').checked = vendor.isSpecial;
+                }
+            }
         }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('modal-form').reset(); }
@@ -279,35 +389,45 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             const type = document.getElementById('form-type').value;
+            const editId = document.getElementById('edit-id').value;
+            const method = editId ? 'PATCH' : 'POST';
+            const endpoint = (type === 'item' ? '/api/items' : '/api/vendors') + (editId ? `/${editId}` : '');
+
             if (type === 'item') {
                 const checks = document.querySelectorAll('.vendor-check:checked');
                 const vendorIds = Array.from(checks).map(c => c.value);
-                if (vendorIds.length === 0) return alert('Select at least one vendor');
-
-                const data = {
+                const itemData = {
                     name: document.getElementById('item-name').value,
                     price: document.getElementById('item-price').value,
                     category: document.getElementById('item-category').value,
                     unit: document.getElementById('item-unit').value,
-                    vendorIds: vendorIds
                 };
-                await fetch('/api/items', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
-                });
+
+                if (editId) {
+                    await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...itemData, vendorId: vendorIds[0]}) });
+                } else {
+                    await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...itemData, vendorIds}) });
+                }
             } else {
                 const data = {
                     name: document.getElementById('vendor-name').value,
-                    phone: document.getElementById('vendor-phone').value.replace(/\D/g, '')
+                    phone: document.getElementById('vendor-phone').value.replace(/\D/g, ''),
+                    isSpecial: document.getElementById('vendor-special').checked
                 };
-                await fetch('/api/vendors', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
-                });
+                await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             }
             closeModal(); loadData();
         }
 
+        function editVendor(id) { openModal('vendor', id); }
+        function editItem(id) { openModal('item', id); }
         async function deleteVendor(id) { if(confirm('Delete?')) { await fetch(`/api/vendors/${id}`, { method: 'DELETE' }); loadData(); } }
         async function deleteItem(id) { if(confirm('Delete?')) { await fetch(`/api/items/${id}`, { method: 'DELETE' }); loadData(); } }
+
+        function applyDateFilter() { renderTransactions(); }
+        function resetDateFilter() { document.getElementById('start-date').value = ''; document.getElementById('end-date').value = ''; renderTransactions(); }
+
+        loadData();
     </script>
 </body>
 </html>
