@@ -74,7 +74,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
-                            <tr><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Vendor Name</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">WhatsApp</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Status</th><th class="px-6 py-4 text-right">Actions</th></tr>
+                            <tr><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">Vendor Name</th><th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase">WhatsApp</th><th class="px-6 py-4 text-right">Actions</th></tr>
                         </thead>
                         <tbody id="vendors-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
@@ -164,10 +164,6 @@
                 <div id="vendor-fields" class="hidden space-y-5">
                     <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500" required>
                     <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500" required>
-                    <label class="flex items-center space-x-3 p-4 bg-emerald-50 rounded-xl cursor-pointer">
-                        <input type="checkbox" id="vendor-special" class="w-5 h-5 rounded text-emerald-500 focus:ring-emerald-500">
-                        <span class="text-sm font-bold text-emerald-700">⭐ Special Vendor Effect</span>
-                    </label>
                 </div>
 
                 <div class="flex space-x-4 pt-6">
@@ -220,7 +216,6 @@
 
                 document.getElementById('vendors-list').innerHTML = vendors.map(v => `
                     <tr><td class="px-6 py-4 font-bold text-gray-900">${v.name}</td><td class="px-6 py-4 text-sm text-gray-500 font-medium">${v.phone}</td>
-                    <td class="px-6 py-4 uppercase text-[10px] font-black tracking-widest">${v.isSpecial ? '<span class="text-emerald-600">SPECIAL ⭐</span>' : '<span class="text-gray-300">STANDARD</span>'}</td>
                     <td class="px-6 py-4 text-right space-x-3">
                         <button onclick="manageVendorItems('${v.id}', '${v.name}')" class="text-emerald-600 font-black text-[10px] uppercase hover:underline">Manage Items</button>
                         <button onclick="editVendor('${v.id}')" class="text-blue-500 font-black text-[10px] uppercase">Edit</button>
@@ -308,7 +303,6 @@
                 } else {
                     const v = vendors.find(v=>v.id===id);
                     document.getElementById('vendor-name').value = v.name; document.getElementById('vendor-phone').value = v.phone;
-                    document.getElementById('vendor-special').checked = v.isSpecial;
                 }
             }
         }
@@ -339,8 +333,7 @@
             } else {
                 body = {
                     name: document.getElementById('vendor-name').value,
-                    phone: document.getElementById('vendor-phone').value.replace(/\D/g, ''),
-                    isSpecial: document.getElementById('vendor-special').checked
+                    phone: document.getElementById('vendor-phone').value.replace(/\D/g, '')
                 };
             }
 

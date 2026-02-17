@@ -29,7 +29,6 @@ export const vendors = pgTable("vendors", {
     .default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
-  isSpecial: boolean("is_special").notNull().default(false),
 });
 
 export const groceryItems = pgTable("grocery_items", {
