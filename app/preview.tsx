@@ -15,6 +15,7 @@ import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import { useOrder } from "@/lib/OrderContext";
 import { useTheme } from "@/lib/useTheme";
+import { getApiUrl } from "@/lib/query-client";
 import { generateOrderMessage, getWhatsAppUrl, getUnitLabel } from "@/lib/store";
 
 export default function PreviewScreen() {
@@ -41,10 +42,30 @@ export default function PreviewScreen() {
   const message = generateOrderMessage(selectedItems, vendor.name, restaurantName);
   const whatsappUrl = getWhatsAppUrl(vendor.phone, message);
 
+  // Calculate total amount for the order record
+  const totalAmount = selectedItems.reduce((sum, i) => sum + (parseFloat(i.price || "0") * i.quantity), 0);
+
   const handleSend = async () => {
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+      // 1. Record the transaction on the server
+      try {
+        const baseUrl = getApiUrl();
+        await fetch(`${baseUrl}/api/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            vendorId: vendor.id,
+            totalAmount: totalAmount.toString(),
+            itemsCount: selectedItems.length,
+          }),
+        });
+      } catch (e) {
+        console.warn("Failed to record order on server, but proceeding to WhatsApp", e);
+      }
+
+      // 2. Add to local history
       addHistoryEntry({
         date: new Date().toISOString(),
         vendorName: vendor.name,
@@ -57,13 +78,14 @@ export default function PreviewScreen() {
         message,
       });
 
+      // 3. Open WhatsApp
       await Linking.openURL(whatsappUrl);
       resetSelections();
       router.dismissAll();
     } catch {
       Alert.alert(
         "Could not open WhatsApp",
-        "Please make sure you have WhatsApp installed to send orders. If the problem continues, try restarting your phone."
+        "Please make sure you have WhatsApp installed to send orders."
       );
     }
   };

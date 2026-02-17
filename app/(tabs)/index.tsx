@@ -17,6 +17,7 @@ import Animated, { FadeIn, Layout, SlideInUp, SlideOutUp } from "react-native-re
 import { useOrder } from "@/lib/OrderContext";
 import { useTheme } from "@/lib/useTheme";
 import { Vendor } from "@/lib/store";
+import { getApiUrl } from "@/lib/query-client";
 
 function VendorCard({ vendor, theme }: { vendor: Vendor; theme: any }) {
   return (
@@ -64,26 +65,32 @@ export default function HomeScreen() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        // Try to reach the server with a short timeout
-        const response = await fetch("https://quick-order-server-y11j.onrender.com/api/vendors", {
-          method: 'HEAD',
-          signal: AbortSignal.timeout(3000)
+        const baseUrl = getApiUrl();
+        // Use the new health check endpoint which is faster and lighter
+        const response = await fetch(`${baseUrl}/api/health`, {
+          method: 'GET',
+          signal: AbortSignal.timeout(5000)
         });
-        setIsOffline(!response.ok);
+
+        if (response.ok) {
+          setIsOffline(false);
+        } else {
+          // If server returns error but responds, it's technically online
+          setIsOffline(false);
+        }
       } catch (error) {
+        // Only show offline if the request actually fails (timeout or no network)
         setIsOffline(true);
       }
     };
 
     checkConnection();
-    // Re-check every 10 seconds
-    const interval = setInterval(checkConnection, 10000);
+    const interval = setInterval(checkConnection, 15000); // Check every 15s to be less intrusive
     return () => clearInterval(interval);
   }, []);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    // Simulating refresh
     setTimeout(() => setRefreshing(false), 1500);
   }, []);
 
@@ -101,7 +108,7 @@ export default function HomeScreen() {
         <Animated.View entering={SlideInUp} exiting={SlideOutUp} style={[styles.offlineBanner, { backgroundColor: theme.danger + '15', borderBottomColor: theme.danger + '30' }]}>
           <Ionicons name="wifi-outline" size={16} color={theme.danger} />
           <Text style={[styles.offlineText, { color: theme.danger, fontFamily: 'Poppins_700Bold' }]}>
-            Disconnected. Please connect to the internet.
+            Connecting to server...
           </Text>
         </Animated.View>
       )}
@@ -131,10 +138,10 @@ export default function HomeScreen() {
               <Ionicons name="people-outline" size={48} color={theme.textSecondary} />
             </View>
             <Text style={[styles.emptyText, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>
-              {isOffline ? "Connection Error" : "No Vendors Found"}
+              {isOffline ? "Server is waking up" : "No Vendors Found"}
             </Text>
             <Text style={[styles.emptySubtext, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-              {isOffline ? "Check your internet to load vendors." : "Add vendors using the Admin Panel to see them here."}
+              {isOffline ? "Please wait a moment while we connect to the live database." : "Add vendors using the Admin Panel to see them here."}
             </Text>
           </View>
         }

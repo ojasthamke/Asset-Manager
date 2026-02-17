@@ -4,6 +4,11 @@ import { storage } from "./storage";
 import { insertGroceryItemSchema, insertVendorSchema, insertProfileSchema, insertOrderSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok" });
+  });
+
   // Profiles
   app.get("/api/profile", async (_req, res) => {
     const profile = await storage.getProfile();
@@ -32,7 +37,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/items", async (req, res) => {
     const { vendorIds, ...itemData } = req.body;
 
-    // Support multi-vendor adding
     if (Array.isArray(vendorIds)) {
       const createdItems = [];
       for (const vId of vendorIds) {
