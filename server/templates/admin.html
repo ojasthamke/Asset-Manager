@@ -162,8 +162,8 @@
                 </div>
 
                 <div id="vendor-fields" class="hidden space-y-5">
-                    <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-emerald-500" required>
                     <label class="flex items-center space-x-3 p-4 bg-emerald-50 rounded-xl cursor-pointer">
                         <input type="checkbox" id="vendor-special" class="w-5 h-5 rounded text-emerald-500 focus:ring-emerald-500">
                         <span class="text-sm font-bold text-emerald-700">⭐ Special Vendor Effect</span>
@@ -172,7 +172,7 @@
 
                 <div class="flex space-x-4 pt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 px-4 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all uppercase text-[10px]">Cancel</button>
-                    <button id="save-btn" type="submit" class="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all uppercase text-[10px]">Save Data</button>
+                    <button id="save-btn" type="submit" class="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all uppercase text-[10px]">Add</button>
                 </div>
             </form>
         </div>
@@ -348,7 +348,7 @@
                 const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 if(res.ok) { closeModal(); await loadData(); } else { alert('Server rejection. Check fields.'); }
             } catch (err) { alert('Network disruption.'); }
-            finally { btn.disabled = false; btn.textContent = 'Save Data'; }
+            finally { btn.disabled = false; btn.textContent = 'Add'; }
         }
 
         async function deleteVendor(id) {
