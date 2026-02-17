@@ -24,6 +24,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="vendor-items" />
       <Stack.Screen name="preview" />
+      <Stack.Screen name="vendors/manage" />
     </Stack>
   );
 }

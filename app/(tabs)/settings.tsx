@@ -91,6 +91,18 @@ export default function SettingsScreen() {
             <Ionicons name="options-outline" size={20} color={theme.tint} />
             <Text style={[styles.sectionTitle, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]}>App Actions</Text>
           </View>
+          {profile && profile.role === 'agency' && (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/vendors/manage");
+              }}
+              style={styles.actionBtn}
+            >
+              <Ionicons name="people-outline" size={24} color={theme.tint} />
+              <Text style={[styles.actionText, { color: theme.text, fontFamily: "Poppins_500Medium" }]}>Manage Vendors</Text>
+            </Pressable>
+          )}
           <Pressable onPress={handleReset} style={styles.actionBtn}>
             <Ionicons name="refresh-circle-outline" size={24} color={theme.danger} />
             <Text style={[styles.actionText, { color: theme.danger, fontFamily: "Poppins_500Medium" }]}>Reset App & Re-onboard</Text>

@@ -90,7 +90,7 @@ export default function OnboardingScreen() {
           </View>
           <Text style={[styles.title, { color: theme.text, fontFamily: "Poppins_700Bold" }]}>Welcome!</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-            Let's set up your profile to customize your experience.
+            Let&apos;s set up your profile to customize your experience.
           </Text>
         </View>
 

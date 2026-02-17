@@ -8,20 +8,53 @@ import {
   ActivityIndicator,
   Platform,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeIn, Layout, SlideInUp, SlideOutUp } from "react-native-reanimated";
-import { BlurView } from "expo-blur";
+import Animated, {
+  FadeIn,
+  Layout,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
+  interpolate
+} from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { useOrder } from "@/lib/OrderContext";
 import { useTheme } from "@/lib/useTheme";
 import { Vendor } from "@/lib/store";
-import { getApiUrl } from "@/lib/query-client";
 
-function VendorCard({ vendor, theme }: { vendor: Vendor & { isSpecial?: boolean }; theme: any }) {
-  const isSpecial = vendor.isSpecial;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+function VendorCard({ vendor, theme, isTop }: { vendor: Vendor; theme: any; isTop: boolean }) {
+  const shimmerProgress = useSharedValue(0);
+
+  useEffect(() => {
+    shimmerProgress.value = withRepeat(
+      withTiming(1, {
+        duration: 3000,
+        easing: Easing.bezier(0.4, 0, 0.6, 1)
+      }),
+      -1,
+      false
+    );
+  }, [shimmerProgress]);
+
+  const animatedShimmerStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      shimmerProgress.value,
+      [0, 1],
+      [SCREEN_WIDTH, -SCREEN_WIDTH]
+    );
+    return {
+      transform: [{ translateX }],
+    };
+  });
 
   return (
     <Pressable
@@ -29,10 +62,15 @@ function VendorCard({ vendor, theme }: { vendor: Vendor & { isSpecial?: boolean 
         styles.vendorCard,
         {
           backgroundColor: theme.card,
-          borderColor: isSpecial ? theme.tint : theme.border,
-          borderWidth: isSpecial ? 2 : 1.5,
+          borderColor: theme.tint + "40",
+          borderWidth: 1.5,
           opacity: pressed ? 0.8 : 1,
           transform: [{ scale: pressed ? 0.98 : 1 }],
+          shadowColor: theme.tint,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          elevation: 6,
         },
       ]}
       onPress={() => {
@@ -43,33 +81,45 @@ function VendorCard({ vendor, theme }: { vendor: Vendor & { isSpecial?: boolean 
         });
       }}
     >
-      <View style={[styles.vendorIcon, { backgroundColor: theme.tint + "10" }]}>
-        <Ionicons name="storefront" size={24} color={theme.tint} />
-      </View>
-      <View style={styles.vendorInfo}>
-        <View style={styles.vendorTitleRow}>
-          {isSpecial ? (
-            <BlurView intensity={80} tint="light" style={styles.glassNameContainer}>
-              <Text style={[styles.vendorName, { color: theme.tint, fontFamily: "Poppins_700Bold" }]}>
-                {vendor.name}
-              </Text>
-            </BlurView>
-          ) : (
+      <View style={styles.cardContentContainer}>
+        {/* Animated Glass/Shimmer Effect */}
+        <Animated.View style={[StyleSheet.absoluteFill, animatedShimmerStyle]}>
+          <LinearGradient
+            colors={['transparent', 'rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.05)', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
+
+        {isTop && (
+          <View style={styles.topBadgeContainer}>
+            <LinearGradient
+              colors={[theme.tint, theme.tint + 'CC']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.badgeGradient}
+            >
+              <Text style={styles.badgeText}>SPECIAL VENDER</Text>
+            </LinearGradient>
+          </View>
+        )}
+
+        <View style={[styles.vendorIcon, { backgroundColor: theme.tint + "15" }]}>
+          <Ionicons name="storefront" size={24} color={theme.tint} />
+        </View>
+        <View style={styles.vendorInfo}>
+          <View style={styles.vendorTitleRow}>
             <Text style={[styles.vendorName, { color: theme.text, fontFamily: "Poppins_600SemiBold" }]}>
               {vendor.name}
             </Text>
-          )}
-          {isSpecial && (
-            <View style={[styles.specialTag, { backgroundColor: theme.tint }]}>
-              <Text style={styles.specialTagText}>SPECIAL</Text>
-            </View>
-          )}
+          </View>
+          <Text style={[styles.vendorPhone, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
+            +{vendor.phone}
+          </Text>
         </View>
-        <Text style={[styles.vendorPhone, { color: theme.textSecondary, fontFamily: "Poppins_400Regular" }]}>
-          +{vendor.phone}
-        </Text>
+        <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
       </View>
-      <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
     </Pressable>
   );
 }
@@ -111,7 +161,7 @@ export default function HomeScreen() {
         contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
         itemLayoutAnimation={Layout.springify()}
-        renderItem={({ item }) => <VendorCard vendor={item} theme={theme} />}
+        renderItem={({ item, index }) => <VendorCard vendor={item} theme={theme} isTop={index === 0} />}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.tint} />
         }
@@ -141,17 +191,34 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 14, opacity: 0.7, marginTop: 4 },
   listContent: { padding: 20 },
   vendorCard: {
+    borderRadius: 24,
+    marginBottom: 20,
+    marginHorizontal: 4,
+    overflow: 'hidden', // Required to clip the glass shimmer
+  },
+  cardContentContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    borderRadius: 24,
-    borderWidth: 1.5,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    width: '100%',
+    position: 'relative',
+  },
+  topBadgeContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  badgeGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderBottomLeftRadius: 16,
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: 'Poppins_700Bold',
+    letterSpacing: 0.5,
   },
   vendorIcon: {
     width: 56,
@@ -164,9 +231,6 @@ const styles = StyleSheet.create({
   vendorInfo: { flex: 1 },
   vendorTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 },
   vendorName: { fontSize: 17 },
-  glassNameContainer: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, overflow: 'hidden' },
-  specialTag: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  specialTagText: { color: '#fff', fontSize: 10, fontFamily: 'Poppins_700Bold' },
   vendorPhone: { fontSize: 13 },
   emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 100, paddingHorizontal: 40 },
   emptyIconContainer: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
