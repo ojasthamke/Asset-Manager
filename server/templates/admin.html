@@ -30,11 +30,10 @@
 
     <!-- Main Admin Panel -->
     <div id="admin-panel" class="hidden">
-        <!-- Header -->
         <header class="bg-white border-b px-4 sm:px-6 py-4 shadow-sm">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <h1 class="text-xl sm:text-2xl font-bold text-gray-900">QuickOrder Admin</h1>
-                <nav class="flex space-x-2 sm:space-x-8 text-sm sm:text-base">
+                <nav class="flex space-x-4 sm:space-x-8 text-sm sm:text-base">
                     <button id="nav-users" onclick="showSection('users')" class="active-nav font-semibold pb-1">Users</button>
                     <button id="nav-vendors" onclick="showSection('vendors')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1">Vendors</button>
                     <button id="nav-items" onclick="showSection('items')" class="text-gray-500 hover:text-emerald-600 font-semibold pb-1">Items</button>
@@ -42,69 +41,168 @@
             </div>
         </header>
 
-        <!-- Content -->
         <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-            <!-- Users Section -->
             <section id="users-section">
-                <div class="bg-white rounded-xl shadow-sm overflow-auto">
+                <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                      <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Shop</th>
-                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Contact</th>
-                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Role</th>
+                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Shop & Owner</th>
+                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Contact & Address</th>
+                               <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Profile Details</th>
                             </tr>
                         </thead>
                         <tbody id="users-list" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </section>
-            <!-- Other sections hidden by default -->
+
+            <section id="vendors-section" class="hidden space-y-6">
+                 <button onclick="openModal('vendor')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Vendor</button>
+                <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor Name</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">WhatsApp</th><th class="px-4 py-3 text-right">Actions</th></tr>
+                        </thead>
+                        <tbody id="vendors-list" class="bg-white divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="items-section" class="hidden space-y-6">
+                <button onclick="openModal('item')" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-bold">Add Item</button>
+                <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Item</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vendor</th><th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Price</th><th class="px-4 py-3 text-right">Actions</th></tr>
+                        </thead>
+                        <tbody id="items-list" class="bg-white divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 
+    <!-- Modal for adding/editing (Common) -->
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 id="modal-title" class="text-xl font-bold mb-4">Add New</h3>
+            <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="form-type">
+                <input type="hidden" id="edit-id">
+
+                <div id="item-fields" class="space-y-4">
+                    <select id="item-vendor" class="w-full border rounded-lg p-2"></select>
+                    <input type="text" id="item-name" placeholder="Item Name" class="w-full border rounded-lg p-2">
+                    <input type="number" step="0.01" id="item-price" placeholder="Price (₹)" class="w-full border rounded-lg p-2">
+                    <select id="item-category" class="w-full border rounded-lg p-2">
+                        <option>Vegetables</option><option>Dairy</option><option>Meat & Eggs</option><option>Staples</option><option>Spices & Herbs</option>
+                    </select>
+                    <select id="item-unit" class="w-full border rounded-lg p-2">
+                        <option value="g">g</option><option value="kg">kg</option><option value="litre">L</option><option value="pieces">pcs</option>
+                    </select>
+                </div>
+
+                <div id="vendor-fields" class="hidden space-y-4">
+                    <input type="text" id="vendor-name" placeholder="Vendor Name" class="w-full border rounded-lg p-2">
+                    <input type="text" id="vendor-phone" placeholder="WhatsApp (91...)" class="w-full border rounded-lg p-2">
+                </div>
+
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 border py-2 rounded-lg">Cancel</button>
+                    <button type="submit" class="flex-1 bg-emerald-500 text-white py-2 rounded-lg font-bold">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // --- AUTHENTICATION ---
         function handleLogin(event) {
             event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            // In a real app, you'd fetch this from the server, but for simplicity we embed it.
-            // Replace 'admin' and 'password' with your desired credentials.
-            const ADMIN_USER = 'admin';
-            const ADMIN_PASS = 'password123';
-
-            if (username === ADMIN_USER && password === ADMIN_PASS) {
+            if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'password123') {
                 sessionStorage.setItem('isAdminAuthenticated', 'true');
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                loadData();
-            } else {
-                document.getElementById('login-error').textContent = 'Invalid username or password.';
-            }
+                showAdminPanel();
+            } else { alert('Wrong login!'); }
         }
 
-        // Check auth on page load
-        if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
+        function showAdminPanel() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('admin-panel').classList.remove('hidden');
             loadData();
         }
 
-        // --- DATA & UI LOGIC ---
+        if (sessionStorage.getItem('isAdminAuthenticated') === 'true') { showAdminPanel(); }
+
+        function showSection(section) {
+            ['users', 'vendors', 'items'].forEach(id => {
+                document.getElementById(`${id}-section`).classList.toggle('hidden', id !== section);
+                const navButton = document.getElementById(`nav-${id}`);
+                navButton.classList.toggle('active-nav', id === section);
+                navButton.classList.toggle('text-gray-500', id !== section);
+            });
+        }
+
         async function loadData() {
-            const res = await fetch('/api/all-profiles');
-            const profiles = await res.json();
-            const usersList = document.getElementById('users-list');
-            usersList.innerHTML = profiles.map(p => `
+            // Load Users
+            const pRes = await fetch('/api/all-profiles');
+            const profiles = await pRes.json();
+            document.getElementById('users-list').innerHTML = profiles.map(p => `
                 <tr>
-                    <td class="px-4 py-3 text-sm font-semibold text-gray-800">${p.shopName}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${p.phone}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${p.role}</td>
+                    <td class="px-4 py-3"><div class="font-bold">${p.shopName}</div><div class="text-xs text-gray-500">${p.ownerName}</div></td>
+                    <td class="px-4 py-3 text-sm"><div>${p.phone}</div><div class="text-xs text-gray-500 truncate max-w-[150px]">${p.address}</div></td>
+                    <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}<br>GST: ${p.gst || '-'}<br>Turnover: ${p.turnover}</td>
                 </tr>
             `).join('');
+
+            // Load Vendors
+            const vRes = await fetch('/api/vendors');
+            const vendors = await vRes.json();
+            document.getElementById('vendors-list').innerHTML = vendors.map(v => `
+                <tr><td class="px-4 py-3 text-sm font-bold">${v.name}</td><td class="px-4 py-3 text-sm">${v.phone}</td>
+                <td class="px-4 py-3 text-right"><button onclick="deleteVendor('${v.id}')" class="text-red-500">Delete</button></td></tr>
+            `).join('');
+            document.getElementById('item-vendor').innerHTML = vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+
+            // Load Items
+            const iRes = await fetch('/api/items');
+            const items = await iRes.json();
+            document.getElementById('items-list').innerHTML = items.map(item => {
+                const vendor = vendors.find(v => v.id === item.vendorId);
+                return `<tr><td class="px-4 py-3 text-sm font-bold">${item.name}</td><td class="px-4 py-3 text-xs text-gray-500">${vendor ? vendor.name : '?'}</td>
+                <td class="px-4 py-3 text-sm font-bold">₹${item.price}</td><td class="px-4 py-3 text-right"><button onclick="deleteItem('${item.id}')" class="text-red-500">Delete</button></td></tr>`;
+            }).join('');
         }
+
+        function openModal(type) {
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('form-type').value = type;
+            document.getElementById('item-fields').classList.toggle('hidden', type !== 'item');
+            document.getElementById('vendor-fields').classList.toggle('hidden', type !== 'vendor');
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('modal-form').reset(); }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const type = document.getElementById('form-type').value;
+            const data = type === 'item' ? {
+                vendorId: document.getElementById('item-vendor').value,
+                name: document.getElementById('item-name').value,
+                price: document.getElementById('item-price').value,
+                category: document.getElementById('item-category').value,
+                unit: document.getElementById('item-unit').value
+            } : {
+                name: document.getElementById('vendor-name').value,
+                phone: document.getElementById('vendor-phone').value.replace(/\D/g, '')
+            };
+            await fetch(type === 'item' ? '/api/items' : '/api/vendors', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+            });
+            closeModal(); loadData();
+        }
+
+        async function deleteVendor(id) { if(confirm('Delete?')) { await fetch(`/api/vendors/${id}`, { method: 'DELETE' }); loadData(); } }
+        async function deleteItem(id) { if(confirm('Delete?')) { await fetch(`/api/items/${id}`, { method: 'DELETE' }); loadData(); } }
     </script>
 </body>
 </html>
