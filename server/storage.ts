@@ -93,9 +93,11 @@ export class DatabaseStorage implements IStorage {
     return vendor!;
   }
   async deleteVendor(id: string): Promise<void> {
-    // Delete items associated with this vendor first
+    // 1. Delete orders associated with this vendor first (foreign key constraint)
+    await this.db.delete(orders).where(eq(orders.vendorId, id));
+    // 2. Delete items associated with this vendor
     await this.db.delete(groceryItems).where(eq(groceryItems.vendorId, id));
-    // Then delete the vendor
+    // 3. Finally delete the vendor
     await this.db.delete(vendors).where(eq(vendors.id, id));
   }
   async getOrders(): Promise<Order[]> {
@@ -128,21 +130,28 @@ export class MemStorage implements IStorage {
   async createGroceryItem(i: InsertGroceryItem) { const id = (this.currentId++).toString(); const item = { ...i, id, price: i.price.toString() } as GroceryItem; this.groceryItems.set(id, item); return item; }
   async updateGroceryItem(id: string, u: Partial<InsertGroceryItem>) {
     const item = this.groceryItems.get(id);
-    const updated = { ...item!, ...u };
+    if (!item) throw new Error("Item not found");
+    const updated = { ...item, ...u };
     if (u.price) updated.price = u.price.toString();
-    this.groceryItems.set(id, updated);
-    return updated;
+    this.groceryItems.set(id, updated as GroceryItem);
+    return updated as GroceryItem;
   }
   async deleteGroceryItem(id: string) { this.groceryItems.delete(id); }
   async getVendors() { return Array.from(this.vendors.values()); }
   async createVendor(v: InsertVendor) { const id = (this.currentId++).toString(); const vendor = { ...v, id, isSpecial: v.isSpecial ?? false }; this.vendors.set(id, vendor); return vendor; }
-  async updateVendor(id: string, u: Partial<InsertVendor>) { const vendor = this.vendors.get(id); const updated = { ...vendor!, ...u }; this.vendors.set(id, updated); return updated; }
+  async updateVendor(id: string, u: Partial<InsertVendor>) { const vendor = this.vendors.get(id); if (!vendor) throw new Error("Vendor not found"); const updated = { ...vendor, ...u }; this.vendors.set(id, updated); return updated; }
   async deleteVendor(id: string) {
-    // Delete items associated with this vendor
+    // 1. Delete orders associated with this vendor
+    const ordersToDelete = Array.from(this.orders.values()).filter(o => o.vendorId === id);
+    for (const order of ordersToDelete) {
+      this.orders.delete(order.id);
+    }
+    // 2. Delete items associated with this vendor
     const itemsToDelete = Array.from(this.groceryItems.values()).filter(i => i.vendorId === id);
     for (const item of itemsToDelete) {
       this.groceryItems.delete(item.id);
     }
+    // 3. Delete the vendor
     this.vendors.delete(id);
   }
   async getOrders() { return Array.from(this.orders.values()); }

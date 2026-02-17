@@ -351,8 +351,40 @@
             finally { btn.disabled = false; btn.textContent = 'Save Data'; }
         }
 
-        async function deleteVendor(id) { if(confirm('Permanently remove this vendor?')) { await fetch(`/api/vendors/${id}`, { method: 'DELETE' }); loadData(); } }
-        async function deleteItem(id) { if(confirm('Permanently remove this item?')) { await fetch(`/api/items/${id}`, { method: 'DELETE' }); loadData(); } }
+        async function deleteVendor(id) {
+            if(confirm('Permanently remove this vendor? This will also delete all items and orders associated with them.')) {
+                try {
+                    const res = await fetch(`/api/vendors/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        alert('Vendor deleted successfully.');
+                        await loadData();
+                    } else {
+                        const err = await res.json();
+                        alert('Failed to delete vendor: ' + (err.error || 'Server error'));
+                    }
+                } catch (e) {
+                    alert('Network error while deleting vendor.');
+                }
+            }
+        }
+
+        async function deleteItem(id) {
+            if(confirm('Permanently remove this item?')) {
+                try {
+                    const res = await fetch(`/api/items/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        await loadData();
+                    } else {
+                        alert('Failed to delete item.');
+                    }
+                } catch (e) {
+                    alert('Network error while deleting item.');
+                }
+            }
+        }
+
+        function editVendor(id) { openModal('vendor', id); }
+        function editItem(id) { openModal('item', id); }
 
         loadData();
     </script>
