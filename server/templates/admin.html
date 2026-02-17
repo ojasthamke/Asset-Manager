@@ -43,7 +43,6 @@
         </header>
 
         <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-            <!-- Sections -->
             <section id="users-section">
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                      <table class="min-w-full divide-y divide-gray-200">
@@ -84,11 +83,6 @@
             </section>
 
             <section id="transactions-section" class="hidden space-y-6">
-                <div class="flex gap-4 items-end bg-white p-4 rounded-xl shadow-sm">
-                    <input type="date" id="start-date" class="border p-2 rounded text-sm">
-                    <input type="date" id="end-date" class="border p-2 rounded text-sm">
-                    <button onclick="applyDateFilter()" class="bg-emerald-500 text-white px-4 py-2 rounded font-bold text-sm">Filter</button>
-                </div>
                 <div id="vendor-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
                 <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -129,9 +123,9 @@
                     <label class="flex items-center space-x-2 text-sm"><input type="checkbox" id="vendor-special"> <span>Special Vendor</span></label>
                 </div>
 
-                <div class="flex space-x-3">
+                <div class="flex space-x-3 pt-4">
                     <button type="button" onclick="closeModal()" class="flex-1 border py-2 rounded-lg">Cancel</button>
-                    <button type="submit" class="flex-1 bg-emerald-500 text-white py-2 rounded-lg font-bold">Save</button>
+                    <button id="save-btn" type="submit" class="flex-1 bg-emerald-500 text-white py-2 rounded-lg font-bold">Save</button>
                 </div>
             </form>
         </div>
@@ -141,24 +135,26 @@
         let vendors = []; let items = []; let orders = []; let currentItemFilter = 'all';
 
         async function loadData() {
-            const [pRes, vRes, iRes, oRes] = await Promise.all([
-                fetch('/api/all-profiles'), fetch('/api/vendors'), fetch('/api/items'), fetch('/api/orders')
-            ]);
-            const profiles = await pRes.json(); vendors = await vRes.json(); items = await iRes.json(); orders = await oRes.json();
+            try {
+                const [pRes, vRes, iRes, oRes] = await Promise.all([
+                    fetch('/api/all-profiles'), fetch('/api/vendors'), fetch('/api/items'), fetch('/api/orders')
+                ]);
+                const profiles = await pRes.json(); vendors = await vRes.json(); items = await iRes.json(); orders = await oRes.json();
 
-            document.getElementById('users-list').innerHTML = profiles.map(p => `
-                <tr><td class="px-4 py-3 font-bold">${p.shopName}<div class="text-xs font-normal">${p.ownerName}</div></td>
-                <td class="px-4 py-3 text-sm">${p.phone}<div class="text-xs text-gray-500">${p.address}</div></td>
-                <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}</td></tr>`).join('');
+                document.getElementById('users-list').innerHTML = profiles.map(p => `
+                    <tr><td class="px-4 py-3 font-bold">${p.shopName}<div class="text-xs font-normal">${p.ownerName}</div></td>
+                    <td class="px-4 py-3 text-sm">${p.phone}<div class="text-xs text-gray-500">${p.address}</div></td>
+                    <td class="px-4 py-3 text-xs uppercase font-bold">Role: ${p.role}</td></tr>`).join('');
 
-            document.getElementById('vendors-list').innerHTML = vendors.map(v => `
-                <tr><td class="px-4 py-3 font-bold">${v.name} ${v.isSpecial ? '⭐' : ''}</td><td class="px-4 py-3 text-sm">${v.phone}</td>
-                <td class="px-4 py-3 text-right"><button onclick="editVendor('${v.id}')" class="text-blue-500 mr-2">Edit</button><button onclick="deleteVendor('${v.id}')" class="text-red-500">Delete</button></td></tr>`).join('');
+                document.getElementById('vendors-list').innerHTML = vendors.map(v => `
+                    <tr><td class="px-4 py-3 font-bold">${v.name} ${v.isSpecial ? '⭐' : ''}</td><td class="px-4 py-3 text-sm">${v.phone}</td>
+                    <td class="px-4 py-3 text-right"><button onclick="editVendor('${v.id}')" class="text-blue-500 mr-2 font-bold">Edit</button><button onclick="deleteVendor('${v.id}')" class="text-red-500 font-bold">Delete</button></td></tr>`).join('');
 
-            document.getElementById('vendor-checkboxes').innerHTML = `<label class="flex items-center space-x-2 text-xs"><input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-600">ALL VENDORS</span></label>` +
-                vendors.map(v => `<label class="flex items-center space-x-2 text-xs"><input type="checkbox" value="${v.id}" class="vendor-check"> <span>${v.name}</span></label>`).join('');
+                document.getElementById('vendor-checkboxes').innerHTML = `<label class="flex items-center space-x-2 text-xs"><input type="checkbox" value="common" class="vendor-check"> <span class="font-bold text-emerald-600">ALL VENDORS</span></label>` +
+                    vendors.map(v => `<label class="flex items-center space-x-2 text-xs"><input type="checkbox" value="${v.id}" class="vendor-check"> <span>${v.name}</span></label>`).join('');
 
-            renderItems(); renderTransactions();
+                renderItems(); renderTransactions();
+            } catch (e) { console.error(e); }
         }
 
         function renderItems() {
@@ -166,7 +162,7 @@
             document.getElementById('items-list').innerHTML = filtered.map(item => {
                 const v = vendors.find(v => v.id === item.vendorId);
                 return `<tr><td class="px-4 py-3 font-bold">${item.name}</td><td class="px-4 py-3 text-xs">${item.vendorId === 'common' ? 'COMMON' : (v ? v.name : '?')}</td>
-                <td class="px-4 py-3 font-bold">₹${item.price}</td><td class="px-4 py-3 text-right"><button onclick="editItem('${item.id}')" class="text-blue-500 mr-2">Edit</button><button onclick="deleteItem('${item.id}')" class="text-red-500">Delete</button></td></tr>`;
+                <td class="px-4 py-3 font-bold">₹${item.price}</td><td class="px-4 py-3 text-right"><button onclick="editItem('${item.id}')" class="text-blue-500 mr-2 font-bold">Edit</button><button onclick="deleteItem('${item.id}')" class="text-red-500 font-bold">Delete</button></td></tr>`;
             }).join('');
         }
 
@@ -180,8 +176,13 @@
         function openModal(type, id = null) {
             document.getElementById('modal').style.display = 'flex';
             document.getElementById('form-type').value = type; document.getElementById('edit-id').value = id || '';
+            document.getElementById('modal-title').textContent = (id ? 'Edit ' : 'Add ') + (type === 'item' ? 'Item' : 'Vendor');
             document.getElementById('item-fields').classList.toggle('hidden', type !== 'item');
             document.getElementById('vendor-fields').classList.toggle('hidden', type !== 'vendor');
+
+            // Clear checks
+            document.querySelectorAll('.vendor-check').forEach(c => c.checked = false);
+
             if(id) {
                 if(type==='item') {
                     const i = items.find(i=>i.id===id);
@@ -198,12 +199,16 @@
 
         async function handleFormSubmit(e) {
             e.preventDefault();
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
             const type = document.getElementById('form-type').value;
             const editId = document.getElementById('edit-id').value;
             const method = editId ? 'PATCH' : 'POST';
             const endpoint = (type === 'item' ? '/api/items' : '/api/vendors') + (editId ? `/${editId}` : '');
 
-            let body = {};
+            let bodyData = {};
             if(type === 'item') {
                 const checks = document.querySelectorAll('.vendor-check:checked');
                 const vendorIds = Array.from(checks).map(c => c.value);
@@ -213,24 +218,42 @@
                     category: document.getElementById('item-category').value,
                     unit: document.getElementById('item-unit').value
                 };
-                if(editId) { body = { ...data, vendorId: vendorIds[0] || 'common' }; }
-                else { body = { ...data, vendorIds }; }
+                if(editId) { bodyData = { ...data, vendorId: vendorIds[0] || 'common' }; }
+                else { bodyData = { ...data, vendorIds: vendorIds.length ? vendorIds : ['common'] }; }
             } else {
-                body = {
+                bodyData = {
                     name: document.getElementById('vendor-name').value,
                     phone: document.getElementById('vendor-phone').value.replace(/\D/g, ''),
                     isSpecial: document.getElementById('vendor-special').checked
                 };
             }
 
-            const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            if(res.ok) { closeModal(); loadData(); } else { alert('Error saving'); }
+            try {
+                const res = await fetch(endpoint, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bodyData)
+                });
+
+                if(res.ok) {
+                    closeModal();
+                    await loadData();
+                } else {
+                    const errText = await res.text();
+                    alert('Server Error: ' + errText);
+                }
+            } catch (err) {
+                alert('Connection Error: ' + err.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
         }
 
         function handleLogin(e) { e.preventDefault(); if(document.getElementById('username').value==='admin' && document.getElementById('password').value==='password123') { sessionStorage.setItem('isAdminAuthenticated','true'); showAdminPanel(); } else { alert('Bad login'); } }
         function showAdminPanel() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('admin-panel').classList.remove('hidden'); loadData(); }
         if (sessionStorage.getItem('isAdminAuthenticated') === 'true') showAdminPanel();
-        function showSection(s) { ['users', 'vendors', 'items', 'transactions'].forEach(id => { document.getElementById(`${id}-section`).classList.toggle('hidden', id !== s); document.getElementById(`nav-${id}`).classList.toggle('active-nav', id === s); }); }
+        function showSection(s) { ['users', 'vendors', 'items', 'transactions'].forEach(id => { document.getElementById(`${id}-section`).classList.toggle('hidden', id !== s); document.getElementById(`nav-${id}`).classList.toggle('active-nav', id === s); document.getElementById(`nav-${id}`).classList.toggle('text-gray-500', id !== s); }); }
         function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('modal-form').reset(); }
         function filterItems(f) { currentItemFilter = f; renderItems(); }
         function editVendor(id) { openModal('vendor', id); }
